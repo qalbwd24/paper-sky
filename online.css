@@ -1,0 +1,62 @@
+.onlineGame #welcome,.onlineGame #combatOverlay,.onlineGame #paused,.onlineGame #layoutButton,.onlineGame #scene,.onlineGame #mazeFloor,.onlineGame #shuffleMaze,.onlineGame #combatMode,.onlineGame #raceRole,.onlineGame #enemyColor,.onlineGame #aimAssist,.onlineGame #viewTarget,.onlineGame #reset,.onlineGame #help,.onlineGame .shortcuts span:nth-last-of-type(-n+2){display:none!important}
+.onlineGame nav a:not(.hallLink){display:none}.hallLink{color:#46645d;background:#fffaeccc;padding:9px;border-radius:5px;font-size:12px;text-decoration:none}
+#onlineUI{position:absolute;inset:0;pointer-events:none;z-index:4;font-size:12px}#onlineUI button,#onlineUI input,#onlineUI select{font:inherit;border:1px solid #c6c9b8;border-radius:5px;padding:8px;background:#fffbee;color:#35594d}#onlineUI button{cursor:pointer}#onlineUI button:hover{background:#e4ecd9}#onlineUI button:disabled{opacity:.5;cursor:default}#onlineUI label{display:block;margin:9px 0}#netLobby{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,90vw);max-height:80vh;overflow:auto;padding:28px;background:#fbf5e8f5;border:1px solid #fff;border-radius:12px;pointer-events:auto;box-shadow:0 15px 80px #283f3733}#netLobby h2{font-size:30px}#netLobby p,#netLobby small{line-height:1.9}#netName{width:80%}#netCreate,#netInviteJoin{background:#41665b!important;color:white!important;margin:5px 6px 14px 0}#netRoom{position:absolute;top:145px;left:24px;width:290px;padding:12px;background:#faf2e4e8;border-radius:8px;pointer-events:auto}#netRoom summary{cursor:pointer;font-weight:600}.netMember{padding:6px 0;font-size:11px;border-bottom:1px solid #687c651a}.netActions{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}#netInvite{font-size:10px!important;width:100%}#netMessage{position:absolute;top:112px;left:50%;transform:translateX(-50%);padding:8px 14px;color:#375749;background:#fff4dbde;border-radius:6px;text-align:center;max-width:70%;pointer-events:none}#netMessage:empty{display:none}#netMessage.error{color:#ac3940}#netStatus{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);padding:9px;background:#fff5e8ed;border-radius:5px;max-width:85vw;text-align:center}#netStatus:empty{display:none}#netCues{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}.netCue{position:absolute;transform:translate(-50%,-140%);background:#fff7dae6;border:1px solid #dcac5c;border-radius:12px;padding:3px 7px;color:#946b23;font-size:12px;white-space:nowrap}.netCue.hunter{color:#c72949;border-color:#d94765}#netProgress{position:absolute;width:82px;height:82px;transform:translate(-50%,-50%);display:grid;align-items:end;text-align:center;color:#fff;font-weight:bold;text-shadow:0 1px 3px #243e34}#netProgress::before{content:"";position:absolute;inset:0;background:conic-gradient(#ffe69a var(--progress,0deg),#fff8dd66 0);border-radius:50%;mask:radial-gradient(circle,transparent 62%,black 65%)}@media(max-width:1100px){#netStatus{bottom:150px}#netRoom{top:190px;width:240px;font-size:10px}#netMessage{top:155px}}@media(max-height:650px){#netRoom{max-height:50vh;overflow:auto}#netLobby{max-height:85vh;padding:18px}}
+.onlineGame footer .telemetry{min-width:0;gap:16px;padding:8px 12px}.onlineGame footer .telemetry strong{font-size:18px}.onlineGame footer .telemetry .status,.onlineGame footer .telemetry>div:nth-child(3){display:none}.onlineGame footer .shortcuts{font-size:8px;gap:10px}.onlineGame #mapCanvas{width:120px;height:120px}
+#onlineUI #netNavigation{position:absolute;left:24px;top:88px;display:flex;gap:6px;pointer-events:auto}#onlineUI #netNavigation button{padding:7px 10px;font-size:12px}#onlineUI #netRoom{top:128px;left:24px;width:240px;padding:9px 11px;max-height:calc(100vh - 285px);overflow:auto}#netRoom:not([open]){width:max-content;max-width:240px}#netRoom .netMember{padding:5px 0;font-size:10px;line-height:1.6}#netRoom button,#netRoom select{padding:5px 7px;font-size:10px}#netRoom label{margin:6px 0}#netTools{margin-top:9px;border-top:1px solid #77886b33;padding-top:8px}#netTools summary{font-size:10px;color:#697b68}#netAITools{margin:8px 0}#netAITools small,#netAISummary{font-size:9px;line-height:1.6;color:#697b68}#netMessage{max-width:55%;top:90px;font-size:11px}#netStatus{bottom:22px;font-size:11px;white-space:normal;max-width:55vw}.onlineGame #location{top:unset!important;bottom:136px;left:36px;font-size:9px;padding:4px 8px;max-width:220px}
+@media(max-width:1100px){#onlineUI #netNavigation{top:110px;left:20px}#onlineUI #netRoom{top:148px;left:20px;width:220px}#netStatus{bottom:85px;max-width:80vw}#netMessage{top:110px;left:auto;right:20px;transform:none;max-width:50%}.onlineGame #mapCanvas{width:100px;height:100px}}
+@media(max-height:600px){#onlineUI #netRoom{max-height:calc(100vh - 220px)}.onlineGame #location{display:none}.onlineGame footer .shortcuts{display:none}#onlineUI #netNavigation{top:68px}#onlineUI #netRoom{top:105px}}
+
+#netToasts{position:absolute;top:116px;right:24px;width:252px;display:grid;gap:8px;max-height:45vh;overflow:hidden}.netToast{padding:12px 14px;background:#fcf5eaf5;border:1px solid #d5c7ad;border-left:3px solid #b98a53;border-radius:7px;box-shadow:0 5px 20px #20362a15;color:#40574b}.netToast strong{font-size:12px}.netToast p{font-size:11px;line-height:1.65;margin:5px 0 0}
+#netFreeze{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:min(350px,80vw);padding:24px;background:#fcf5eaf5;border:1px solid #fff8e9;border-radius:12px;box-shadow:0 16px 70px #243e3440;pointer-events:auto;color:#3b594c}#netFreeze[hidden]{display:none!important}#netFreeze h2{margin:0 0 12px;font-size:24px}#netFreeze p{line-height:1.9;font-size:12px}#netFreeze .netActions{margin:16px 0 0}
+.netCue{left:0;top:0;width:164px;box-sizing:border-box;display:flex;align-items:center;gap:5px;font-size:11px;will-change:transform;transition:none}.netCueName{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}.netCueDistance{width:46px;flex:none;text-align:right;font-variant-numeric:tabular-nums}.netCue.offline{opacity:.55}
+@media(max-width:800px){#netToasts{top:148px;right:15px;width:210px}.netCue{width:140px;font-size:10px}}
+
+
+/* Shared warm-paper room shell; game canvas and input remain unchanged. */
+.onlineGame{--room-paper:#faf7ef;--room-ink:#263f3b;--room-muted:#536570;--room-border:#c9d0c7}
+#onlineUI{color:var(--room-ink)}
+#onlineUI *,#onlineUI *::before,#onlineUI *::after{box-sizing:border-box}
+#onlineUI button,#onlineUI input,#onlineUI select{min-height:44px;padding:10px 12px;font-size:13px;border-color:var(--room-border);border-radius:10px;color:var(--room-ink);background:#fffdf7}
+#onlineUI button:focus-visible,#onlineUI summary:focus-visible,#onlineUI input:focus-visible,#onlineUI select:focus-visible{outline:3px solid #406f78;outline-offset:2px}
+#onlineUI button:hover:not(:disabled){background:#e8eee4}
+#onlineUI #netStart,#onlineUI #netCreate,#onlineUI #netInviteJoin{background:#30584f;color:#fff}
+#onlineUI #netDissolve{color:#963c3b;border-color:#c79c92}
+#onlineUI #netLobby,#onlineUI #netRoom{background:var(--room-paper);border:1px solid var(--room-border);border-radius:14px;box-shadow:0 10px 30px #243a3226;scrollbar-gutter:stable;overscroll-behavior:contain}
+#onlineUI #netLobby{max-height:calc(100dvh - 220px);padding:22px}
+#onlineUI #netRoom{top:154px;width:300px;max-height:calc(100dvh - 270px);padding:12px}
+#onlineUI #netRoom:not([open]){width:max-content;max-width:calc(100vw - 32px)}
+#onlineUI #netNavigation{top:90px;gap:6px;max-width:calc(100vw - 32px)}
+#onlineUI #netNavigation button{min-height:44px;padding:8px 10px;font-size:12px}
+#netRoom summary{min-height:32px;display:list-item;line-height:2}
+#netRoom #netReadiness{font-size:12px;line-height:1.7;color:var(--room-muted);margin:8px 0}
+#netRoom .netMember{font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+#netRoom .netActions>button{flex:1 1 auto}
+#netRoom label select{max-width:100%}
+#onlineUI #netInvite{font-size:12px!important;width:100%}
+#netTools summary,#netAITools small,#netAISummary{font-size:12px;color:var(--room-muted)}
+#netConnection{position:absolute;right:24px;top:92px;padding:7px 10px;background:var(--room-paper);color:var(--room-ink);border:1px solid var(--room-border);border-radius:10px;font-size:12px}
+#netConnection:empty{display:none}
+#netMessage{top:142px;left:auto;right:24px;transform:none;max-width:calc(100vw - 380px);background:var(--room-paper);color:var(--room-ink);border:1px solid var(--room-border)}
+#netStatus{background:var(--room-paper);color:var(--room-ink)}
+@media(max-width:600px){
+ .onlineGame header{padding:10px 12px}.onlineGame .brand p{display:none}.onlineGame nav{max-height:54px;overflow:auto}
+ #onlineUI #netNavigation{top:84px;left:12px;max-width:calc(100vw - 24px)}
+ #onlineUI #netRoom{top:190px;left:12px;width:calc(100vw - 24px);max-height:calc(100dvh - 290px)}
+ #onlineUI #netLobby{top:190px;transform:translateX(-50%);width:calc(100vw - 24px);max-height:calc(100dvh - 205px);padding:18px}
+ #netConnection{top:136px;left:12px;right:auto;padding:4px 8px}
+ #netMessage{top:136px;left:112px;right:12px;max-width:none;font-size:11px;padding:5px 8px}
+ #netStatus{max-width:calc(100vw - 24px);width:max-content;bottom:80px;font-size:10px}
+ .onlineGame #map,.onlineGame #location{display:none}
+}
+@media(max-height:500px) and (min-width:601px){
+ #onlineUI #netNavigation{top:62px;left:12px}
+ #onlineUI #netRoom{top:114px;left:12px;width:300px;max-height:calc(100dvh - 130px)}
+ #onlineUI #netLobby{top:114px;transform:translateX(-50%);max-height:calc(100dvh - 130px);padding:16px}
+ #netConnection{top:64px;right:12px}#netMessage{top:110px;right:12px;max-width:calc(100vw - 340px)}
+ #netStatus{left:auto;right:12px;transform:none;bottom:12px;max-width:calc(100vw - 340px)}
+ .onlineGame #map,.onlineGame footer{display:none}
+}
+
+#netLobby room-browser{display:block;margin:16px 0}.roomVisibility{display:flex!important;align-items:center;gap:8px}.roomVisibility input[type=checkbox]{width:auto!important}#mapLabel{max-width:160px;white-space:normal}
+
+#netCaptureStatus{position:absolute;bottom:58px;left:50%;transform:translateX(-50%);max-width:72vw;padding:7px 12px;border-radius:8px;background:#faf7efeb;color:#354c41;font-size:11px;text-align:center;pointer-events:none;font-variant-numeric:tabular-nums}#netCaptureStatus:empty{display:none}.netCueDistance{width:58px}@media(max-width:700px){#netCaptureStatus{bottom:114px;max-width:94vw;width:max-content;font-size:10px}}

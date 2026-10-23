@@ -1,0 +1,43 @@
+const crypto=require('node:crypto');const {THREE:T,P,getWorld}=require('./world.cjs');
+const key=()=>crypto.randomBytes(16).toString('hex'),hash=s=>crypto.createHash('sha256').update(s).digest('hex');
+class Rooms{
+ constructor({world=getWorld(),maxRooms=4,now=()=>Date.now()}={}){this.world=world;this.maxRooms=maxRooms;this.now=now;this.rooms=new Map();}
+ member(r,identity){return r.players.find(p=>p.identity===identity);}
+ create(identity,name,skin,publicRoom=false){if(this.rooms.size>=this.maxRooms)throw Error('房间已满，请稍后重试');if([...this.rooms.values()].filter(r=>r.owner===identity).length>=2)throw Error('每人最多创建两个房间');const id=key().slice(0,8),invite=key(),r={id,public:publicRoom===true,owner:identity,inviteHash:hash(invite),players:[],hunter:null,running:false,started:false,time:0,version:0,lock:{id:null,time:0},missile:null,event:null,eventId:0,updated:this.now()};this.rooms.set(id,r);this.join(r,identity,name,skin,invite);return {r,invite};}
+ join(r,identity,name,skin,invite,internal=false){if(this.member(r,identity))return this.member(r,identity);if(!internal&&r.public!==true&&hash(String(invite||''))!==r.inviteHash)throw Error('需要房主分享的邀请链接');if(r.players.length>=4)throw Error('房间已满（最多 4 人，断线席位会暂时保留）');const p={id:key().slice(0,12),identity,name:this.name(name),skin:P.skins.includes(skin)?skin:'original',score:0,caught:0,online:false,disconnected:this.now(),epoch:0,ack:0,queue:[],input:P.neutral(),lastInput:0,body:new P.Contact(),immune:3,s:P.spawn(this.world,r.players.length)};r.players.push(p);if(!r.hunter)r.hunter=p.id;r.version++;r.updated=this.now();return p;}
+ addBot(r,who){const owner=this.member(r,who);if(!owner||owner.kind==='bot')throw Error('只有房间玩家可以创建代理');const p=this.join(r,hash(key()),'测试机 '+(r.players.filter(p=>p.kind==='bot').length+1),['math','mechanical','white'][r.players.length%3],null,true);p.kind='bot';p.proxy=owner.id;return p;}
+ name(n){return String(n||'纸翼旅人').replace(/[\x00-\x1f<>]/g,'').trim().slice(0,16)||'纸翼旅人';}
+ requireHost(r,who){if(r.owner!==who)throw Error('只有房主可以操作');}
+ start(r,who,hunter){this.requireHost(r,who);if(r.players.length<2||r.players.some(p=>!p.online))throw Error('至少两人，且所有成员在线后开始');if(!r.players.some(p=>p.id===hunter))throw Error('请选择追击机');r.hunter=hunter;r.running=true;r.started=true;r.lock={id:null,time:0};r.missile=null;for(const [i,p]of r.players.entries()){this.respawn(p,i);p.score=p.caught=0;}r.version++;this.event(r,'start',{hunter});}
+ respawn(p,slot=0){p.s=P.spawn(this.world,slot);p.body.reset();p.epoch++;p.ack=0;p.lastSeq=0;p.queue=[];p.input=P.neutral();p.immune=3;}
+ designate(r,who,id){this.requireHost(r,who);if(!r.players.some(p=>p.id===id))throw Error('玩家不存在');r.hunter=id;r.lock={id:null,time:0};r.missile=null;for(const p of r.players){p.epoch++;p.ack=0;p.lastSeq=0;p.queue=[];p.immune=3;}r.version++;this.event(r,'designate',{hunter:id});}
+ remove(r,identity){const p=this.member(r,identity);if(!p)return;r.players=r.players.filter(q=>q!==p&&q.proxy!==p.id); if(!r.players.length){this.rooms.delete(r.id);return;}if(r.owner===identity)r.owner=(r.players.find(q=>q.kind!=='bot')||r.players[0]).identity;if(!r.players.some(q=>q.id===r.hunter))r.hunter=r.players[0].id;r.running=r.running&&r.players.length>=2;r.lock={id:null,time:0};r.missile=null;r.version++;this.event(r,'leave',{name:p.name});}
+ event(r,type,data){r.event={id:++r.eventId,type,...data};r.updated=this.now();}
+ tick(r){
+  const dt=P.DT;if(!r.running||r.players.length<2||r.players.some(p=>!p.online))return;r.time+=dt;
+  for(const p of r.players){p.old={...p.s};p.immune=Math.max(0,p.immune-dt);const command=p.queue.shift();if(command){p.ack=command.seq;p.input=command.input;p.lastInput=this.now();}else if(this.now()-p.lastInput>250)p.input=P.neutral();P.step(p.s,p.input,p.id===r.hunter,p.body,this.world);}
+  if(r.missile){const m=r.missile,target=r.players.find(p=>p.id===m.target),hunter=r.players.find(p=>p.id===m.hunter);if(!target||!hunter||hunter.kind==='bot'&&target.kind==='bot'){r.missile=null;return;}m.age+=dt;const a=new T.Vector3(...m.p),desired=P.pos(target.s).sub(a).normalize(),v=new T.Vector3(...m.v).normalize().lerp(desired,1-Math.exp(-18*dt)).normalize().multiplyScalar(Math.min(125,48+m.age*220)),delta=v.clone().multiplyScalar(dt),end=a.clone().add(delta),length=delta.length(),wall=this.world.raycast(a,delta.clone().normalize(),length);
+   const rel=a.clone().sub(P.pos(target.old)),rd=delta.clone().sub(P.pos(target.s).sub(P.pos(target.old))),aa=rd.lengthSq(),bb=2*rel.dot(rd),cc=rel.lengthSq()-1.05**2,disc=bb*bb-4*aa*cc,t=cc<=0?0:disc>=0&&aa>1e-9?(-bb-Math.sqrt(disc))/(2*aa):Infinity;
+   if(t>=0&&t<=1&&(!wall||t<wall.fraction)){const at=P.pos(target.s).toArray();hunter.score++;target.caught++;r.hunter=target.id;this.respawn(target,0);hunter.immune=3;hunter.epoch++;hunter.queue=[];hunter.ack=0;hunter.lastSeq=0;hunter.input=P.neutral();r.lock={id:null,time:0};r.missile=null;r.version++;this.event(r,'capture',{hunter:hunter.id,target:target.id,at});return;}
+   if(wall||end.y<this.world.ground(end.x,end.z,end.y)||m.age>1.4){r.missile=null;this.event(r,'blocked',{at:wall?a.addScaledVector(delta,wall.fraction).toArray():end.toArray()});return;}m.p=end.toArray();m.v=v.toArray();return;
+  }
+  const h=r.players.find(p=>p.id===r.hunter),targets=r.players.filter(p=>p!==h&&(h.kind!=='bot'||p.kind!=='bot')&&p.immune<=0&&P.eligible(this.world,h.s,p.s));const target=targets.find(p=>p.id===r.lock.id)||targets.sort((a,b)=>P.pos(a.s).distanceToSquared(P.pos(h.s))-P.pos(b.s).distanceToSquared(P.pos(h.s)))[0];
+  if(!target){r.lock={id:null,time:0};return;}if(r.lock.id!==target.id)r.lock={id:target.id,time:0};r.lock.time+=dt;
+  if(r.lock.time+1e-8>=P.LOCK){const muzzle=P.pos(h.s).addScaledVector(P.dir(h.s),.95);if(P.clear(this.world,P.pos(h.s),muzzle)){r.missile={id:++r.eventId,hunter:h.id,target:target.id,p:muzzle.toArray(),v:P.pos(target.s).sub(muzzle).normalize().multiplyScalar(48).toArray(),age:0};r.lock={id:null,time:0};}}
+ }
+ captureView(r){
+  const base={range:P.RANGE,seconds:P.LOCK,coneDegrees:P.CONE,target:null,distance:null,time:r.lock.time};
+  if(!r.running||r.players.length<2)return {...base,reason:'waiting'};
+  if(r.players.some(p=>!p.online))return {...base,reason:'disconnect'};
+  const h=r.players.find(p=>p.id===r.hunter),targets=r.players.filter(p=>p!==h&&(h?.kind!=='bot'||p.kind!=='bot'));
+  if(!h||!targets.length)return {...base,reason:'no-human'};
+  const target=targets.find(p=>p.id===(r.missile?.target||r.lock.id))||targets.reduce((a,b)=>P.pos(a.s).distanceToSquared(P.pos(h.s))<=P.pos(b.s).distanceToSquared(P.pos(h.s))?a:b);
+  const detail=P.inspect(this.world,h.s,target.s);
+  return {...base,target:target.id,distance:Math.round(detail.distance*10)/10,immune:Math.max(0,target.immune),reason:r.missile?'missile':target.immune>0?'immune':detail.reason==='ready'&&r.lock.time>0?'locking':detail.reason};
+ }
+ snapshot(r,identity){const me=this.member(r,identity);return {type:'state',protocol:1,rules:{range:P.RANGE,lockSeconds:P.LOCK},capture:this.captureView(r),id:r.id,public:r.public===true,you:me?.id,host:r.players.find(p=>p.identity===r.owner)?.id,hunter:r.hunter,running:r.running,started:!!r.started,frozen:r.started&&r.players.length<2?'players':r.running&&r.players.some(p=>!p.online)?'disconnect':null,waiting:r.players.some(p=>!p.online),seed:P.SEED,time:r.time,version:r.version,lock:r.lock,missile:r.missile,event:r.event,players:r.players.map(p=>({id:p.id,kind:p.kind||'human',proxy:p.proxy||null,name:p.name,skin:p.skin,score:p.score,caught:p.caught,online:p.online,rangeToYou:me?Math.round(P.pos(p.s).distanceTo(P.pos(me.s))*10)/10:null,reconnectSeconds:p.online?0:Math.max(0,Math.ceil((60000-(this.now()-p.disconnected))/1000)),epoch:p.epoch,ack:p.ack,immune:p.immune,s:p.s,...(p===me?{contact:P.pack(p.body)}:{})}))};}
+ save(){return [...this.rooms.values()].map(r=>({...r,missile:null,lock:{id:null,time:0},players:r.players.map(({body,queue,input,...p})=>({...p,online:false}))}));}
+ load(list){for(const v of Array.isArray(list)?list:[]){if(this.rooms.size>=this.maxRooms)break;if(!/^[a-f0-9]{8}$/.test(v.id)||!Array.isArray(v.players)||v.players.length>4)continue;v.started=v.started??(v.running||v.time>0);v.missile=null;v.lock={id:null,time:0};for(const p of v.players){p.body=new P.Contact();p.queue=[];p.input=P.neutral();p.online=false;p.disconnected=this.now();p.epoch++;p.ack=0;p.immune=3;}this.rooms.set(v.id,v);}}
+ sweep(){for(const r of this.rooms.values()){for(const p of [...r.players])if(!p.online&&this.now()-p.disconnected>60000)this.remove(r,p.identity);if(this.now()-r.updated>30*60*1000&&!r.players.some(p=>p.online))this.rooms.delete(r.id);}}
+}
+module.exports={Rooms,hash};

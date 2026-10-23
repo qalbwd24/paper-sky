@@ -1,0 +1,22 @@
+{
+  "alignment": {
+    "samples": 78,
+    "maxError": 0.004220499602937783,
+    "metrics": {
+      "rtt": 81,
+      "correction": 6.938981591926886e-10,
+      "remotes": 1,
+      "viewTime": 1.6912731045749883,
+      "bufferMs": 169,
+      "bufferUnderruns": 6,
+      "ai": []
+    }
+  },
+  "disconnectFreeze": true,
+  "reconnectResumes": true,
+  "lastPlayerFreeze": true,
+  "addProxyRecovery": true,
+  "lastHumanBecomesHost": true,
+  "aiTargetsHuman": true,
+  "errors": []
+}

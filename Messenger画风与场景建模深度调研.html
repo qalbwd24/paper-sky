@@ -1,0 +1,368 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Messenger画风与场景建模深度调研</title><style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#fff;color:#252525;font:16px/1.85 "Microsoft YaHei",system-ui,sans-serif}main{max-width:1020px;margin:52px auto;padding:0 36px 70px}h1{font-size:32px;line-height:1.4;font-weight:650;margin:0 0 36px}h2{font-size:23px;margin:52px 0 20px;border-bottom:1px solid #d4d4d4;padding-bottom:10px}h3{font-size:19px;margin:34px 0 12px}p{margin:13px 0}a{color:#205d73;text-underline-offset:3px;overflow-wrap:anywhere}sup{font-size:11px;margin-left:2px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.65;margin:24px 0}th,td{padding:11px 13px;text-align:left;vertical-align:top;border:1px solid #ddd}th{background:#f0f0f0;font-weight:600}tr:nth-child(even) td{background:#fafafa}img{width:100%;height:auto;display:block;margin:25px 0 8px}em{font-size:13px;color:#666}code{font:13px/1.6 Consolas,monospace;background:#f0f0f0;padding:2px 4px;overflow-wrap:anywhere}.sources{font-size:13px;padding-left:27px}.sources li{padding-left:4px;margin:12px 0}.sources p{margin:0}li{margin:9px 0}@media(max-width:650px){main{padding:0 18px;margin:30px auto}h1{font-size:25px}table{font-size:12px}td,th{padding:7px}}@media print{main{max-width:none;margin:0;padding:0}body{font-size:11pt}h2{break-after:avoid}table,img{break-inside:avoid}a{color:inherit}h1{font-size:22pt}}
+</style><main><h1>Messenger 画风与场景建模深度调研</h1>
+<h2>结论与推荐</h2>
+<p><strong>现有 Three.js 游戏可以沿着 Messenger 的美术方向改善，无须先更换游戏引擎。真正需要升级的是场景资产、空间组织和材质导入方式。</strong> 目前最值得采用的组合是：用完整街区模型建立质量样板，用统一的模块化模型包扩建，用成熟开源渲染代码处理植被、配色与轮廓。</p>
+<p>没有核实到 Abeto 官方公开发布、附带开放许可证的 Messenger 完整源码和原版场景模型。能找到网页静态镜像，但这与原作者授权所有人复用是两回事。另一方面，确实存在可用的替代品：Littlest Tokyo 提供完成度很高的日式街区；Bruno Simon 的项目提供场景工程、GLB 和渲染实现；Quaternius 提供适合继续搭建的开放模型包。<sup><a href="#source-1">[1]</a></sup><sup><a href="#source-3">[3]</a></sup><sup><a href="#source-4">[4]</a></sup><sup><a href="#source-8">[8]</a></sup></p>
+<p>推荐优先级：</p>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>资源</th>
+<th>最值得取用的部分</th>
+<th>用于现有游戏的判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>第一</td>
+<td>Littlest Tokyo / Glen Fox</td>
+<td>已搭好的日式建筑群、店面细节和动画</td>
+<td>最快证明“精细模型确实能改善画面”；适合一个主题街区</td>
+</tr>
+<tr>
+<td>第一</td>
+<td>Quaternius Ultimate Stylized Nature</td>
+<td>树、石、植被及配套纹理</td>
+<td>替换目前过于方块化的自然景物，适合逐区采用</td>
+</tr>
+<tr>
+<td>第一</td>
+<td>Bruno Simon folio-2025</td>
+<td>完整场景工程、植被组织、颜色与阴影代码</td>
+<td>学习和拆取价值最高；整套迁移成本较高</td>
+</tr>
+<tr>
+<td>第二</td>
+<td>Quaternius Medieval Village MegaKit</td>
+<td>墙、屋顶、窗、楼梯、内外结构</td>
+<td>适合扩建可穿行村落；免费版与完整工程版要分清</td>
+</tr>
+<tr>
+<td>第二</td>
+<td>Bruno Simon folio-2019</td>
+<td>Matcap 材质、地面阴影和区域模型</td>
+<td>轻量画面处理的方法更容易接到现有 WebGL 游戏</td>
+</tr>
+<tr>
+<td>第二</td>
+<td>cortiz2894/stylized-components</td>
+<td>风动草地、树叶、水岸效果</td>
+<td>取所需组件；无需把整套 React 网站搬进来</td>
+</tr>
+</tbody></table>
+<p>这些推荐中的“适合程度”属于对本项目的技术和美术判断，不是原作者对飞行游戏性能的承诺。</p>
+<h2>Messenger 的制作方法</h2>
+<p>Abeto 在 2026 年 1 月的制作文章中说明：场景先按展开的立方体布局建模，再变成球面；环境经过手工搭建；全局颜色使用一张 16×16 的色板纹理；轮廓线采用可控制粗细、颜色和透明度的自定义系统；植被和远近模型有专门优化。<sup><a href="#source-1">[1]</a></sup></p>
+<p>创作者的另一篇访谈确认，建模使用 Blender 与 Houdini，前端使用 Three.js，着色器等大量部分由团队定制。<strong>因此，“导入低模，再套 Three.js 默认卡通材质”不能被当作原作的已证实技术方案。</strong><sup><a href="#source-2">[2]</a></sup></p>
+<p><img src="references/messenger-research/messenger-start.png" alt="Messenger 的球形世界与整体配色"></p>
+<p><em>图 1：Messenger 实际网页的启动画面。画面与作品版权属于 Abeto；截图用于分析，不是可复用的游戏素材。</em></p>
+<h3>画面的可观察特征</h3>
+<p>现场画面呈现出青绿、灰绿、米白等大色块，边缘有细线，亮暗关系相对简洁。树冠保持破碎的叶丛轮廓；路缘、栏杆、立柱、楼梯与建筑高差带来可辨认的尺度。近看仍有小细节，但主要物体轮廓不会被密集纹理淹没。<sup><a href="#source-18">[18]</a></sup></p>
+<p>这种方向更接近“有线稿的三维插画”。它与像素化、全屏纸张噪声或纯黑白水墨可以共享一些处理手段，但最终需要不同的模型和材质设计。对黑色飞鸟而言，偏浅的彩色或灰墨环境通常比全场景浓黑更利于辨认姿态；这是针对飞行视角的配色建议。</p>
+<h3>模型质量应体现在什么地方</h3>
+<p>场景物体不必追求写实的细分数量，但应有三层尺度：远处能辨认屋顶和树冠，飞近后看见阳台、雨棚与窗框，低空掠过时再看见门前台阶、管线和花盆。第一层靠外轮廓，第二层主要靠真实几何，第三层可以混用几何和贴图。</p>
+<p>例如，“方盒子加斜屋顶”可以辨认成房屋，却很难形成值得绕飞的对象。给它增加错层屋檐、退入墙面的窗、外廊与小庭院，增加的面数可以很有限，空间信息却会明显改善。应优先购买或复用已经包含这些关系的资产，而不是用更多随机方盒子填满地图。</p>
+<p>建模中的轻微不规则也应固定在物体上：屋檐可以略有曲折，石块可以不对称，树冠可以分成大小不同的簇。不能用每帧随机晃动几何来模拟手绘，尤其在高速飞行里，那会直接变成抖动和视觉噪声。</p>
+<h3>场景组织比“随机物体数量”更重要</h3>
+<p>适合探索的布景，需要道路、建筑和地形互相解释。建筑正面朝向街道，桥连接真实岸线，阶梯连接两个平台，围墙留下合理入口；一段狭窄巷道结束后，应能看到广场、河面或另一个地标。随机化主要用于花草、破损、摆件和同类建筑的变化。</p>
+<p>飞行关卡还需要考虑地面游戏不一定照顾到的视角：屋顶应有内容，建筑背面应能观看，桥洞上方不能被隐形碰撞体封死，远处应出现可辨认的穿行目标。完整“展示模型”也不自动等于完整“飞行关卡”，这正是素材接入后的主要设计工作。</p>
+<h2>可直接下载的完整场景与建筑</h2>
+<h3>1. Littlest Tokyo：最适合先验证的日式街区</h3>
+<p><strong>入口：</strong><a href="https://threejs.org/examples/webgl_animation_keyframes.html">Three.js 在线示例</a> · <a href="https://github.com/mrdoob/three.js/blob/dev/examples/models/gltf/LittlestTokyo.glb">模型文件页面</a> · <a href="https://glenatron.artstation.com/projects/AJGbV">作者作品页</a>。<sup><a href="#source-3">[3]</a></sup></p>
+<p><img src="references/messenger-research/littlest-tokyo.png" alt="Littlest Tokyo 日式街区模型"></p>
+<p><em>图 2：Three.js 官方示例中的 Littlest Tokyo，Glen Fox，CC BY 4.0。截图保留原示例署名。</em></p>
+<p>对实际 GLB 文件的结构检查得到以下结果。计数描述文件内容，不等于单帧渲染统计；材质数量也不等于 draw call 数量。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th align="right">检查结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文件大小</td>
+<td align="right">4,133,072 字节，约 4.13 MB</td>
+</tr>
+<tr>
+<td>存储的三角面数</td>
+<td align="right">141,802</td>
+</tr>
+<tr>
+<td>Mesh 定义 / Node</td>
+<td align="right">71 / 214</td>
+</tr>
+<tr>
+<td>材质 / 图像</td>
+<td align="right">15 / 4</td>
+</tr>
+<tr>
+<td>动画片段</td>
+<td align="right">1</td>
+</tr>
+<tr>
+<td>几何压缩</td>
+<td align="right">Draco</td>
+</tr>
+<tr>
+<td>内嵌许可</td>
+<td align="right">CC-BY-4.0</td>
+</tr>
+</tbody></table>
+<p>内嵌元数据记录作者为 glenatron，标题为 Littlest Tokyo，并提供原始 Sketchfab 来源。材质列表中确实包含 <code>outline</code>。这比只看转载页面的“免费下载”更有依据。原作者作品页所说的约 8 万三角面明确排除了描边；不能把这个数字当成当前下载 GLB 的总面数。<sup><a href="#source-3">[3]</a></sup></p>
+<p>**建议用途：**先作为一个独立、尺度合理的小街区，让鸟绕着屋顶、街角和店面飞行。先保留原始材质与动画，确认效果，再做克制的统一配色。它的细节密度和完成度适合做基准，但整体仍是一个紧凑的展示模型，不应在未经拆解的情况下重复几十份铺成大城。</p>
+<p>**接入工作：**现有加载器补接匹配版本的 Draco 解码器；保留材质与节点层级；用动画系统播放片段；把装饰、描边和真实碰撞表面分开。室内是否完整、每个开口能否穿行、哪些运动节点需要动态碰撞，仍要逐项验证。<sup><a href="#source-14">[14]</a></sup></p>
+<h3>2. Bruno Simon folio-2025：完整制作工程最有参考价值</h3>
+<p><strong>入口：</strong><a href="https://bruno-simon.com/">在线作品</a> · <a href="https://github.com/brunosimon/folio-2025">源码仓库</a> · <a href="https://github.com/brunosimon/folio-2025/blob/main/license.md">许可证</a>。仓库根许可证为 MIT；音乐目录另有 CC0 文件。<code>package.json</code> 的许可证字段仍写着 ISC，与根文件不同，使用时应一并保留记录，以实际许可文件为核对依据。<sup><a href="#source-4">[4]</a></sup></p>
+<p>仓库实际包含 <code>resources/folio-2025.blend</code>、区域场景、地形和大量 GLB 资源，因此它不是仅有渲染器的空架子。检查时 Blender 主工程约 16.1 MB，<code>static/areas/areas.glb</code> 约 3.29 MB；这只是两个文件，<strong>不代表整套下载或运行内存</strong>。<sup><a href="#source-4">[4]</a></sup></p>
+<p>最值得阅读的源码入口：</p>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>对场景美术的用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sources/Game/Materials/MeshDefaultMaterial.js</code></td>
+<td>统一亮暗、阴影颜色、地面反射色近似、水线和雾</td>
+</tr>
+<tr>
+<td><code>sources/Game/World/Foliage.js</code></td>
+<td>用少量叶片面片、整理过的法线和实例绘制组织树冠</td>
+</tr>
+<tr>
+<td><code>sources/Game/World/Grass.js</code></td>
+<td>草地实例与风动</td>
+</tr>
+<tr>
+<td><code>sources/Game/World/Scenery.js</code></td>
+<td>从场景资源组织对象、处理道路</td>
+</tr>
+<tr>
+<td><code>sources/Game/Rendering.js</code></td>
+<td>质量档、泛光和景深的开关方式</td>
+</tr>
+</tbody></table>
+<p>这里能看到两项很实用的方法。首先，树叶既需要破碎外形，也需要整体连贯的明暗，不能只给每张小面片照同一盏灯。其次，材质可以主动设计阴影颜色和地面的返色，不必通过昂贵的真实全局光照获得全部艺术效果。以上判断来自实际材质与植被代码，不是对 Messenger 内部实现的推断。<sup><a href="#source-5">[5]</a></sup></p>
+<p>**适用限制：**当前依赖为 Three.js <code>^0.183.2</code>，代码使用 <code>three/webgpu</code>、TSL 与节点材质；现有游戏是 r160 WebGL。GLB 几何可单独研究和取用，但自定义材质不会随 GLB 自动恢复。建议优先借用其场景组织和材质方法，整套场景若要保留原貌，应先在独立分支或独立示例中运行新版渲染器。<sup><a href="#source-5">[5]</a></sup></p>
+<h3>3. Bruno Simon folio-2019：较容易采用的轻量场景处理</h3>
+<p><strong>入口：</strong><a href="https://github.com/brunosimon/folio-2019">源码</a> · <a href="https://github.com/brunosimon/folio-2019/blob/master/license.md">MIT 许可证</a>。仓库包含 <code>resources/3d/model.blend</code>、<code>render.blend</code>、区域 GLB、分开的碰撞模型及地面阴影贴图。当前依赖里的 Three.js 是 <code>^0.164.1</code>，与现有游戏更接近。<sup><a href="#source-6">[6]</a></sup></p>
+<p><code>src/javascript/World/Materials.js</code> 使用 Matcap 材质组织不同颜色，<code>World/Shadows.js</code> 与各区的 <code>floorShadow.png</code> 展示了低成本阴影方法。Matcap 可以理解为用一张“已画好光照的球面色图”给表面上色，适合稳定的插画感，但不能直接解决所有方向的真实光照。<sup><a href="#source-6">[6]</a></sup></p>
+<p>**建议用途：**采用其接地阴影、模型分区、视觉模型与碰撞模型分离的方法。其玩具式美术与 Messenger 仍有区别，整套照搬不会变成日式手绘街区。球面世界还需要把阴影和材质使用的平面坐标改成局部坐标。</p>
+<h3>4. Dayonel / nestor.gg：现成精细建筑的补充</h3>
+<p><strong>入口：</strong><a href="https://www.nestor.gg/">在线作品</a> · <a href="https://github.com/Dayonel/nestor.gg">源码</a> · <a href="https://discourse.threejs.org/t/3d-amsterdam-portfolio/60802">作者发布说明</a>。根目录是 MIT 许可证，包含四个 <code>amsterdam*.glb</code> 建筑文件；依赖 Three.js <code>^0.156.1</code>。<sup><a href="#source-7">[7]</a></sup></p>
+<p>实际检查的 <code>amsterdam1.glb</code> 为 288,476 字节、约 3.25 万存储三角面、10 个 mesh、4 个材质，使用 Draco。它说明几百 KB 的下载也可以包含较细的窗框和立面形状，但压缩体积小并不等于面数少。</p>
+<p>**建议用途：**作为另一种街区的建筑基础。在线作品的紫红灯光不必保留，可统一改成灰白墙面和柔和光照。它没有完整城市规划，也没有建筑室内质量保证。仓库未看到独立模型授权说明，应随所取资产保留根许可证和作者信息；正式扩展前再逐个检查模型来源及立面完整性。<sup><a href="#source-7">[7]</a></sup></p>
+<h3>5. Sketchbook：完整世界可用，重点不在美术</h3>
+<p><strong>入口：</strong><a href="https://github.com/swift502/Sketchbook">swift502/Sketchbook</a>。MIT 项目，提供 <code>src/blend/world.blend</code>、<code>build/assets/world.glb</code> 及载具。作者已在 2023 年宣布停止开发并归档。<sup><a href="#source-12">[12]</a></sup></p>
+<p>它更适合参考“如何从 Blender 场景组织地图与碰撞”，不是本轮追求画风的首选。已有飞行控制无需为了这张地图替换成它的整套旧架构；若挑选场景元素，仍应独立适配材质和球面位置。</p>
+<h2>开放模型包与可复用画风代码</h2>
+<h3>模型包</h3>
+<table>
+<thead>
+<tr>
+<th>资源</th>
+<th>开放情况与内容</th>
+<th>最合适的用途</th>
+<th>需要注意</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://quaternius.com/packs/ultimatestylizednature.html">Quaternius Ultimate Stylized Nature</a></td>
+<td>CC0，63 个模型，含 glTF、FBX、OBJ、Blend，带纹理</td>
+<td>自然区的主力植被与岩石</td>
+<td>与现有块状树混用时，需逐区更换并统一尺度</td>
+</tr>
+<tr>
+<td><a href="https://quaternius.com/packs/medievalvillagemegakit.html">Quaternius Medieval Village MegaKit</a></td>
+<td>CC0；完整系列 304 模型，免费 Standard 是子集</td>
+<td>有内外墙、屋顶、窗、楼梯的模块化街区</td>
+<td>Pro 与 Source 收费，不能把全部 304 件及引擎工程都算作免费下载</td>
+</tr>
+<tr>
+<td><a href="https://kaylousberg.itch.io/kaykit-medieval-builder-pack">KayKit Medieval Builder Pack</a></td>
+<td>CC0，200+ 建筑、道路、水域和地形部件，含 GLTF</td>
+<td>远景村落、风格明确的卡通区域</td>
+<td>旧版已标 Legacy；六边形内容有新版，整体更偏微缩玩具</td>
+</tr>
+</tbody></table>
+<p>以上许可与格式来自作者页面。Quaternius 的 Source 版本包含引擎工程、额外配置和 Blender 源文件；“资产许可开放”与“每个版本都免费获取”是不同问题。<sup><a href="#source-8">[8]</a></sup><sup><a href="#source-9">[9]</a></sup></p>
+<p>对于主体美术，建议先选一个模型家族，而不是同时混用大量风格不同的免费素材。每个主题区可以变化，但最好共享地面明度、阴影色、轮廓规则和细节密度。否则颜色统一后，比例、倒角、树形和屋顶语言仍会互相冲突。</p>
+<h3>渲染代码</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>能复用什么</th>
+<th>许可证核对</th>
+<th>现有游戏的采用方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://github.com/cortiz2894/stylized-components">cortiz2894/stylized-components</a></td>
+<td>动漫草地、花、树叶、水面、岸边交界</td>
+<td>原仓库含标准 MIT 文件，README 另强调署名</td>
+<td>抽取 GLSL 与生成逻辑；非完整城镇</td>
+</tr>
+<tr>
+<td><a href="https://github.com/spite/sketch">spite/sketch</a></td>
+<td>素描、排线、版画、漫画类非写实渲染实验</td>
+<td>代码 MIT，演示纸张纹理等另有来源</td>
+<td>适合水墨/素描主题的效果样板；避免全套高开销后处理</td>
+</tr>
+<tr>
+<td><a href="https://github.com/craftzdog/ghibli-style-shader">craftzdog/ghibli-style-shader</a></td>
+<td>插画式树冠演示和教学实现</td>
+<td>README 标 MIT，未取得独立 LICENSE 文件</td>
+<td>次选学习资源；采用前补齐所取代码及模型的许可记录</td>
+</tr>
+</tbody></table>
+<p><code>stylized-components</code> 的原作者仓库是 <strong>cortiz2894</strong>；检索中还会出现 <strong>craftedbygc</strong> 的 fork。应优先从原仓库取代码。它使用 R3F 和较新的 Three.js；其中草地和水面逻辑可以移植，但组件 API 不能原样放进当前原生 JavaScript 场景。<sup><a href="#source-10">[10]</a></sup></p>
+<p>尤其值得借鉴的是“地面泥土分布同时控制草的密度与颜色”：这样草丛与裸土能自然衔接，而不是把草模型直接插到颜色完全不同的地面上。水面组件则包括多遍波浪计算；飞鸟主要从空中掠过时，可以先采用颜色、水岸和少量涟漪，把完整交互波浪作为可选项。<sup><a href="#source-10">[10]</a></sup></p>
+<p><code>spite/sketch</code> 作者明确表示实验没有以性能为首要目标。适合学习其线条与明暗表达，不适合据此承诺轻薄本在大场景里流畅运行。其历史 Safari 说明也不应当作今天浏览器支持情况的结论。craftzdog 的树冠示例则更接近一个教学切片，不能当作完整森林资产包。<sup><a href="#source-11">[11]</a></sup><sup><a href="#source-17">[17]</a></sup></p>
+<h2>现有游戏为什么仍显得单调</h2>
+<p>以下是对本地球形场景源码和已有预览截图的判断，不是 Messenger 的内部实现说明。</p>
+<h3>空间布局仍偏规则</h3>
+<p><code>planet-scenery.js</code> 中，集镇建筑围绕圆环放置；遗迹由一组环状拱门组成；峡谷重复岩门；自然物主要通过位置散布补充。区域的主题已经分开，但每区内部的路线、结构和物体关系仍偏简单。</p>
+<p>可以把随机化从“选择坐标”升级为“选择有关系的组合”：街角组合包含两栋相邻建筑、雨棚、转角小路与花盆；河岸组合包含码头、台阶、挡土墙和桥；树林组合包含大小树簇、草地过渡及可穿行间隙。固定主路线，再随机挑选这些组合，既有变化，也能保持街区成立。</p>
+<h3>导入时主动丢失了一部分模型效果</h3>
+<p>在 <code>planet-world.js</code> 的 <code>styleMaterial</code> 中，所有导入材质都替换为 <code>MeshLambertMaterial</code>，并统一设置 <code>flatShading: true</code> 和 <code>DoubleSide</code>。只复制了基础贴图、颜色以及部分透明参数，还统一降低了饱和度。原材质的 AO、法线贴图、发光与专门的描边配置等没有完整保留。</p>
+<p>后续遍历又把 mesh 转成静态实例，没有建立原 GLB 动画的播放流程。这适合已知、简单、静态的 Kenney 零件；对 Littlest Tokyo 这样的完整带动画场景并不合适。加载成功也不能证明原作外观被保留。</p>
+<p>建议增加两种导入路径。<strong>完整场景默认保留原材质、节点、法线和动画；经过确认的静态零件再进入实例绘制与统一改色流程。</strong> 需要手绘风格时，只对选中的墙、屋顶和地面修改材质，不应让玻璃、树叶、描边、发光窗户都经过同一个转换器。</p>
+<h3>阴影和线条需要表达结构</h3>
+<p>目前建筑边线使用 45° 的几何边提取，并以约 0.22 透明度绘制；这能增强部分棱线，但不是完整的屏幕轮廓系统。地面上的接触暗部也不能表达所有屋檐、凹窗与层间遮挡关系。</p>
+<p>下一步最有价值的是先恢复模型原有的面部明暗和凹处遮蔽，再对重要结构补线。单纯把现有边线调黑，可能只会把低模块状外形强调得更明显。</p>
+<h2>建议采用的场景建模流程</h2>
+<h3>先完成一块能绕飞的街区</h3>
+<p>建议首个质量样板约 150–250 米尺度，包含两条高度不同的路线、一处桥或连廊、一个明确地标和一片开敞空地。这个范围是设计起点，可以按模型尺度调整；不是引擎限制。</p>
+<p>按“从湖面接近—钻过桥洞—沿街道上升—经过屋檐—转入庭院—飞回河面”的顺序布置空间。先验证能否飞得顺，再补花草和摆件。路径宽度不只按鸟的翼展决定，还要容纳转弯半径、速度和跟随相机。</p>
+<p>样板完成后，把它扩展为三种区域：日式生活街区以店面和巷道为主；林间遗迹以树冠、石阶和残墙为主；水边坡城以挡土墙、桥、露台和塔楼为主。区域之间用稀疏山林或水面连接，避免处处同样密集。</p>
+<h3>半径 2 公里可以保留，但不必铺满同等级细节</h3>
+<p>半径 2 公里的球面面积约 <strong>50.3 平方公里</strong>，由 <code>4πR²</code> 得出。这个尺度允许长距离滑翔，却意味着“整球每平方米都有精细街区”会带来很大的制作负担。丰富的体验可以集中在数个经过设计的可飞区域，远方保留低细节山体、树冠色块和地标剪影。</p>
+<p>无需把整座 GLB 直接弯成球。推荐每个小建筑保持刚性，沿球面法线朝外放置；道路、河岸和长桥按短段贴合地表。以半径 2 公里为例，相对切平面，距中心水平 100 米处的球面落差约 2.5 米，所以长街区若仅作为一个平板摆上去，地基和道路会明显悬空或穿地。</p>
+<p>跨区接缝应安排在河道、山脊、林带或桥梁附近。这里既方便处理不同模型的边缘，也能让场景转换看起来有地理原因。远近层级应保留区域轮廓：远处仍能看见塔、树林和桥，近处才加载窗框、护栏与小摆件。</p>
+<h3>不会建模也能采用的工作方式</h3>
+<p>可以直接使用 GLB，并用现有 Three.js 场景配置记录位置、旋转和尺度。要调整整条街、楼梯连接或地形高差时，Blender 的任务主要是“摆放和检查已完成模型”，不必先学习雕刻或手绘贴图。</p>
+<p>Blender 工程、GLB 和运行画面是三个不同层次。工程里的复杂节点材质不一定能完整输出到 glTF；浏览器效果也可能由额外代码生成。优先选择已经提供 GLB 与浏览器演示的资源，可以减少这类不一致。</p>
+<h2>材质、描边与性能方案</h2>
+<h3>推荐画面组合</h3>
+<p>推荐先采用柔和的三维插画：浅灰或米白墙面，少量红褐屋顶，灰绿树冠，蓝绿水面；保留窗洞与屋檐暗部；轮廓线用深灰绿而非全黑；黑鸟作为画面的高对比主体。水墨感可以体现在颜色、留白、树冠边缘和远山，而不是对每一帧做强烈模糊。</p>
+<p>这套方案的先后顺序是：<strong>保留好模型 → 修好材质 → 做出接地与遮挡 → 补轮廓 → 最后加纸感。</strong> 任一步都能单独对比，避免把结构问题藏在后处理里。</p>
+<h3>三类描边方法的选择</h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>优势</th>
+<th>局限</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>几何结构边，例如 EdgesGeometry</td>
+<td>容易控制屋檐、墙角等固定边</td>
+<td>不自动等于随视角变化的外轮廓；细线远处可能闪烁</td>
+<td>保留用于建筑关键结构，做距离淡出</td>
+</tr>
+<tr>
+<td>背面外扩轮廓，例如 OutlineEffect</td>
+<td>适合物体外轮廓，颜色与粗细可调</td>
+<td>增加绘制；薄片、硬法线和实例需要检查</td>
+<td>先在少量主体上试用</td>
+</tr>
+<tr>
+<td>深度/法线屏幕边缘检测</td>
+<td>能统一处理多类物体的轮廓与折面</td>
+<td>额外渲染目标、边缘采样及抗锯齿成本</td>
+<td>作为中高画质选项，不先对整球开启</td>
+</tr>
+</tbody></table>
+<p>Three.js 的 EdgesGeometry 根据相邻面的法线夹角筛选边；OutlineEffect 是已有 WebGL 附加组件。它们是可复用基础，不是 Abeto 自定义描边系统的已确认替代品。<sup><a href="#source-13">[13]</a></sup></p>
+<h3>光照与阴影</h3>
+<p>对于静态建筑，优先保留或制作 AO、烘焙明暗和接触阴影；对飞鸟与附近少量重要物体，按需求增加局部实时阴影。光照跟随球面位置时，阴影方向、局部向上方向和材质坐标也应一起检查。</p>
+<p>不建议为了接近这种画风先加入实时光追。画面缺少窗框、层次和构图时，真实反射不会补出这些内容。Bruno 的材质代码也给出了可直接学习的艺术化明暗方法。烘焙可以采用离线光线追踪计算，但结果输出成纹理后，运行游戏不需要逐帧光追。<sup><a href="#source-5">[5]</a></sup><sup><a href="#source-6">[6]</a></sup></p>
+<h3>轻薄本的验收重点</h3>
+<p>地图半径不是主要性能指标。更需要关注同时可见物体、绘制批次、屏幕分辨率、透明树叶覆盖面积、实时阴影和后处理遍数。复制完整 Littlest Tokyo 多次，即使几何与贴图共享，仍会增加绘制和屏幕工作量。</p>
+<p>建议保留三档开关，而不是用“是否手绘”决定性能：</p>
+<table>
+<thead>
+<tr>
+<th>档位</th>
+<th>画面内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>清晰顺滑</td>
+<td>原始模型材质或轻量替代、静态遮蔽、少量结构线，近处才显示草</td>
+</tr>
+<tr>
+<td>柔和插画</td>
+<td>在上档基础上增加选择性轮廓、少量近场阴影和风动植被</td>
+</tr>
+<tr>
+<td>观景</td>
+<td>适度提高草密度、阴影质量或后处理；以实测决定能否开启</td>
+</tr>
+</tbody></table>
+<p>以 60 FPS 为目标时，每帧预算约 16.7 ms。验收应固定分辨率与路线，对比原场景和新场景的帧时间、卡顿峰值、加载停顿及持续运行表现。本文的网页观察和 GLB 检查不等于接入后的性能测试，也不据此保证特定帧率。</p>
+<h2>最小改进范围与代码复用入口</h2>
+<p>建议下一次实现按以下顺序推进，各步都形成可观察结果：</p>
+<ol>
+<li><strong>完整模型预览。</strong> 单独载入 Littlest Tokyo，保留原始材质，确认 Draco、动画、透明和描边显示正确。</li>
+<li><strong>飞行接入。</strong> 采用本项目飞行器和相机，调整建筑尺度与可穿行通道；排除描边及小装饰的碰撞。</li>
+<li><strong>材质对比。</strong> 提供“原作材质 / 柔和插画”两种模式，避免先破坏原效果再猜测修复。</li>
+<li><strong>自然景物更新。</strong> 选 Quaternius 的同一套树石，借鉴开源草地的颜色与地表过渡方法。</li>
+<li><strong>扩成主题区域。</strong> 只有样板的画面、飞行和帧时间达标后，才扩建道路和新的街区。</li>
+</ol>
+<p>模型处理优先采用现成的 <a href="https://gltf-transform.dev/cli">glTF Transform</a>：检查、去重、纹理处理、合并和简化都有对应功能。压缩下载与减少渲染成本应分开处理；Draco 主要解决传输与存储，不能据此假设 GPU 面数下降。合并也应按小区域进行，否则可能破坏局部剔除。<sup><a href="#source-15">[15]</a></sup></p>
+<table>
+<thead>
+<tr>
+<th>本地位置</th>
+<th>需要调整的职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>planet-world.js</code> 的 <code>scenery()</code></td>
+<td>区分完整场景与静态零件，接入解码器，保留材质、动画与层级</td>
+</tr>
+<tr>
+<td><code>planet-world.js</code> 的 <code>styleMaterial()</code></td>
+<td>按材质类别转换，保留透明、法线、AO、发光及专门轮廓</td>
+</tr>
+<tr>
+<td><code>planet-scenery.js</code></td>
+<td>用街区组合、道路与地标组织布局，随机化放在次要细节上</td>
+</tr>
+<tr>
+<td>模型准备流程</td>
+<td>记录许可、尺寸、节点分类、碰撞代理与远景版本</td>
+</tr>
+</tbody></table>
+<p>这些是明确的改进方案，本报告没有修改上述游戏文件。</p>
+<h2>证据范围与未采用资源</h2>
+<p>资源页面、仓库许可与模型文件以 2026 年 9 月 11 日核查内容为准。Bruno folio-2025 的检查快照为 <code>41046b57eeed8d156d9c3fd7fa259900baef7816</code>；folio-2019 为 <code>540f13573a6da282eae942a4c67335b97cd18970</code>。本地保留了相关文件清单和两份 GLB 的结构检查记录。</p>
+<p>Messenger 的画面与制作访谈可作为美术参照。<code>Kilganon725/messenger.abeto</code> 是静态镜像，根目录没有开放许可证，README 还将使用限制在使用者自行取得的授权范围内。因此不将它列为可以自由复制的原版项目。<sup><a href="#source-16">[16]</a></sup></p>
+<p><code>FuLong97/threejs-nature-scene</code> 虽含模型文件，未发现项目级开放许可；依赖目录里的 MIT 文件不等于场景和作品获 MIT 授权。Wayfinder 具有相关视觉价值，但没有核实到可直接采用的官方完整开放源码，因此不作为本轮的复用方案。没有为了增加清单数量而把这些条目并入推荐。</p>
+<p>已直接检查 Littlest Tokyo 与一份 Amsterdam GLB；Bruno 的模型以仓库文件清单和源代码为依据，未完整下载、安装并运行整个源码工程。Quaternius 与 KayKit 的许可和格式以作者页面为依据，未逐个检查全部压缩包。这些边界不影响优先级判断，但正式导入时仍应保留各资产的来源和许可文件。</p>
+<h2>Sources</h2>
+<ol class="sources"><li id="source-1" value="1"><p>Abeto. <a href="https://www.awwwards.com/messenger.html">Messenger — Case Study</a>. Awwwards, 2026-01-15. 作者对球形建模、色板、描边和环境优化的说明。</p>
+</li><li id="source-2" value="2"><p>Vicente Lucendo / Abeto. <a href="https://www.commarts.com/webpicks/messenger">Messenger</a>. Communication Arts，页面未显示明确发布日期。创作者访谈，技术栈与美术取向。</p>
+</li><li id="source-3" value="3"><p>Glen Fox. <a href="https://glenatron.artstation.com/projects/AJGbV">Littlest Tokyo</a>，作者作品页；Three.js <a href="https://threejs.org/examples/webgl_animation_keyframes.html">在线示例</a>、<a href="https://github.com/mrdoob/three.js/blob/dev/examples/webgl_animation_keyframes.html">示例源码</a>、<a href="https://threejs.org/examples/models/gltf/LittlestTokyo.glb">实际 GLB 文件</a>。许可和文件计数同时核对了 GLB 的 <code>asset.extras</code> 与 glTF JSON。</p>
+</li><li id="source-4" value="4"><p>Bruno Simon. <a href="https://github.com/brunosimon/folio-2025">folio-2025 仓库</a>、<a href="https://github.com/brunosimon/folio-2025/blob/main/license.md">MIT 许可</a>、<a href="https://github.com/brunosimon/folio-2025/tree/main/resources">资源工程</a>、<a href="https://github.com/brunosimon/folio-2025/tree/main/static/areas">区域模型</a>、<a href="https://github.com/brunosimon/folio-2025/blob/main/static/sounds/musics/license.md">音乐许可</a>。</p>
+</li><li id="source-5" value="5"><p>Bruno Simon. folio-2025 <a href="https://github.com/brunosimon/folio-2025/blob/main/sources/Game/Rendering.js">Rendering.js</a>、<a href="https://github.com/brunosimon/folio-2025/blob/main/sources/Game/Materials/MeshDefaultMaterial.js">MeshDefaultMaterial.js</a>、<a href="https://github.com/brunosimon/folio-2025/blob/main/sources/Game/World/Foliage.js">Foliage.js</a>、<a href="https://github.com/brunosimon/folio-2025/blob/main/package.json">package.json</a>。实际源码，用于版本、植被、阴影和渲染分析。</p>
+</li><li id="source-6" value="6"><p>Bruno Simon. <a href="https://github.com/brunosimon/folio-2019">folio-2019</a>、<a href="https://github.com/brunosimon/folio-2019/blob/master/license.md">license.md</a>、<a href="https://github.com/brunosimon/folio-2019/blob/master/src/javascript/World/Materials.js">Materials.js</a>、<a href="https://github.com/brunosimon/folio-2019/blob/master/src/javascript/World/Shadows.js">Shadows.js</a>、<a href="https://github.com/brunosimon/folio-2019/blob/master/package.json">package.json</a>。</p>
+</li><li id="source-7" value="7"><p>Nestor Orest Plysyuk Hladunko / Dayonel. <a href="https://github.com/Dayonel/nestor.gg">nestor.gg</a>、<a href="https://github.com/Dayonel/nestor.gg/blob/main/LICENSE">LICENSE</a>、<a href="https://github.com/Dayonel/nestor.gg/tree/main/static/models">模型目录</a>、<a href="https://github.com/Dayonel/nestor.gg/blob/main/src/components/scenes/Scene1.svelte">Scene1.svelte</a>。另见作者的 <a href="https://discourse.threejs.org/t/3d-amsterdam-portfolio/60802">Three.js forum 发布帖</a>，2024-01-27。</p>
+</li><li id="source-8" value="8"><p>Quaternius. <a href="https://quaternius.com/packs/ultimatestylizednature.html">Ultimate Stylized Nature Pack</a>，2022-05；<a href="https://quaternius.com/packs/medievalvillagemegakit.html">Medieval Village MegaKit</a>，2025-01；<a href="https://quaternius.itch.io/medieval-village-megakit">该套件下载版本</a>。作者发布页，CC0、文件格式与版本差异。</p>
+</li><li id="source-9" value="9"><p>Kay Lousberg. <a href="https://kaylousberg.itch.io/kaykit-medieval-builder-pack">(Legacy) KayKit — Medieval Builder Pack</a>。作者页面，CC0、GLTF、内容与 Legacy 状态。</p>
+</li><li id="source-10" value="10"><p>Christian Ortiz. <a href="https://github.com/cortiz2894/stylized-components">stylized-components 原仓库</a>、<a href="https://github.com/cortiz2894/stylized-components/blob/main/LICENSE">LICENSE</a>、<a href="https://github.com/cortiz2894/stylized-components/blob/main/package.json">package.json</a>、<a href="https://github.com/cortiz2894/stylized-components/tree/main/src/components/grassField">草地组件</a>、<a href="https://github.com/cortiz2894/stylized-components/tree/main/src/components/waterFloor">水面组件</a>。</p>
+</li><li id="source-11" value="11"><p>Jaume Sánchez / spite. <a href="https://github.com/spite/sketch">sketch</a>、<a href="https://github.com/spite/sketch/blob/master/LICENSE">MIT 许可</a>、<a href="https://spite.github.io/sketch/">在线演示</a>。README 对性能目标和外部素材的说明。</p>
+</li><li id="source-12" value="12"><p>swift502. <a href="https://github.com/swift502/Sketchbook">Sketchbook</a>、<a href="https://github.com/swift502/Sketchbook/blob/master/LICENSE">LICENSE</a>、<a href="https://github.com/swift502/Sketchbook/tree/master/src/blend">Blender 场景文件</a>。停止开发说明日期 2023-02-20。</p>
+</li><li id="source-13" value="13"><p>Three.js. <a href="https://threejs.org/docs/pages/EdgesGeometry.html">EdgesGeometry</a>、<a href="https://threejs.org/docs/pages/OutlineEffect.html">OutlineEffect</a>。官方接口文档；实际接入应使用与运行库匹配的版本。</p>
+</li><li id="source-14" value="14"><p>Three.js. <a href="https://threejs.org/docs/pages/GLTFLoader.html">GLTFLoader</a>。官方文档，Draco 解码器、动画及加载结果结构。</p>
+</li><li id="source-15" value="15"><p>Don McCurdy 等. <a href="https://gltf-transform.dev/cli">glTF Transform CLI</a>。检查、去重、简化、压缩和模型处理命令。</p>
+</li><li id="source-16" value="16"><p>Kilganon725. <a href="https://github.com/Kilganon725/messenger.abeto">messenger.abeto</a>。README 中的静态镜像与授权范围说明；文件清单未列出项目级 LICENSE。</p>
+</li><li id="source-17" value="17"><p>Takuya Matsuyama / craftzdog. <a href="https://github.com/craftzdog/ghibli-style-shader">ghibli-style-shader</a>、<a href="https://github.com/craftzdog/ghibli-style-shader/blob/main/package.json">package.json</a>。README 声明 MIT；未找到独立 LICENSE 文件。</p>
+</li><li id="source-18" value="18"><p>Abeto. <a href="https://messenger.abeto.co/">Messenger 实际网页</a>。本文启动页和近景截图来自实际渲染，属于视觉观察；不据此推断未公开的着色器算法。</p>
+</li></ol></main></html>

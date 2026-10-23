@@ -1,0 +1,63 @@
+{
+  "diagnostics": [
+    {
+      "id": "78222438d966",
+      "hunter": "9ab64c9f275b",
+      "players": 4,
+      "rtt": 270,
+      "correction": 0.0007870249122810358,
+      "remotes": 3,
+      "viewTime": 7.828826812325212,
+      "bufferMs": 280,
+      "bufferUnderruns": 13,
+      "ai": []
+    },
+    {
+      "id": "9ab64c9f275b",
+      "hunter": "9ab64c9f275b",
+      "players": 4,
+      "rtt": 279,
+      "correction": 0.0005478912815128797,
+      "remotes": 3,
+      "viewTime": 7.8294683813908605,
+      "bufferMs": 280,
+      "bufferUnderruns": 14,
+      "ai": []
+    },
+    {
+      "id": "5081c58876fc",
+      "hunter": "9ab64c9f275b",
+      "players": 4,
+      "rtt": 275,
+      "correction": 0.000784022881770377,
+      "remotes": 3,
+      "viewTime": 7.817122872630378,
+      "bufferMs": 280,
+      "bufferUnderruns": 13,
+      "ai": []
+    },
+    {
+      "id": "0487aa900d7e",
+      "hunter": "9ab64c9f275b",
+      "players": 4,
+      "rtt": 632,
+      "correction": 3.5163604179263763,
+      "remotes": 3,
+      "viewTime": 6.896822910621332,
+      "bufferMs": 191,
+      "bufferUnderruns": 2,
+      "ai": []
+    }
+  ],
+  "server": {
+    "rssMB": 132.5078125,
+    "heapMB": 67.79496765136719,
+    "tickMs": 1.3416494583572154,
+    "maxTickMs": 40.62680000000182,
+    "overruns": 0,
+    "connections": 4,
+    "bytes": 1511955,
+    "loopP95Ms": 32.145407
+  },
+  "errors": []
+}

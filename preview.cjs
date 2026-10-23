@@ -1,0 +1,4 @@
+// Optional local preview server. The game also opens directly from index.html.
+const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
+const root=__dirname,port=Number(process.argv[2]||8768);
+http.createServer((req,res)=>{let target;try{target=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));}catch{res.writeHead(400).end();return;}if(target===root)target=path.join(root,'index.html');if(!target.startsWith(root+path.sep)){res.writeHead(403).end();return;}fs.readFile(target,(err,data)=>{if(err){res.writeHead(404).end('Not found');return;}res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.txt':'text/plain; charset=utf-8'})[path.extname(target)]||'application/octet-stream');res.setHeader('Cache-Control','no-store');res.end(data);});}).listen(port,'127.0.0.1',()=>console.log('Paper flight: http://127.0.0.1:'+port));

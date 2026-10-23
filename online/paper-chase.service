@@ -1,0 +1,28 @@
+[Unit]
+Description=Paper Chase four-player game
+After=network.target
+
+[Service]
+Type=simple
+User=paper-chase
+Group=paper-chase
+WorkingDirectory=/opt/paper-chase/current/online
+ExecStart=/usr/bin/node --max-old-space-size=192 server.cjs
+Environment=HOST=127.0.0.1
+EnvironmentFile=/etc/paper-chase.env
+Environment=DATA_FILE=/var/lib/paper-chase/rooms.json
+Environment=MAX_ROOMS=2
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/paper-chase
+MemoryMax=384M
+CPUQuota=75%
+TasksMax=32
+
+[Install]
+WantedBy=multi-user.target

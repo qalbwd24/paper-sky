@@ -1,0 +1,5 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),THREE=require('./vendor/three.min.js'),FlightCore=require('./flight-core.js');
+const sb={THREE,FlightCore};vm.createContext(sb);vm.runInContext(fs.readFileSync(__dirname+'/flight-effects.js','utf8')+';this.FX=FlightEffects;',sb);
+function vertices(offset){const effect=new sb.FX(new THREE.Scene(),{capabilities:{isWebGL2:true}}),camera=new THREE.PerspectiveCamera();camera.position.copy(offset).add(new THREE.Vector3(0,.23,1));effect.time=.1;effect.nodes=[[0,.35,.7].map((z,i)=>({p:new THREE.Vector3(.06,0,z).add(offset),born:i*.02,life:.39,intensity:1,burst:1,wind:{x:0,y:0,z:0}})),[]];effect.buildWakes(camera);assert.equal(effect.geometry.drawRange.count,12);return Array.from(effect.positions.slice(0,36));}
+const near=vertices(new THREE.Vector3()),far=vertices(new THREE.Vector3(2500,1800,-3200));for(let i=0;i<near.length;i++)assert.ok(Math.abs(near[i]-far[i])<1e-7,'translated wakes retain submillimetre geometry');
+console.log('PASS: thin wing trails retain precision at kilometre coordinates.');

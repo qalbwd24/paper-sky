@@ -1,0 +1,18 @@
+{
+  "scenario": "actual city, weaving runner with normal wall collisions",
+  "result": {
+    "capture": 1,
+    "time": 18.75,
+    "minDistance": 6.40443883139335,
+    "maxSpeed": 41.974467398239135,
+    "brake": 312,
+    "boost": 694,
+    "decisions": 94,
+    "decisionMs": 1.8535808510638123,
+    "maxLock": 1.483333333333333,
+    "locked": 89,
+    "plans": 2,
+    "botCollisions": 0,
+    "runnerCollisions": 0
+  }
+}

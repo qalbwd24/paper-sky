@@ -1,0 +1,51 @@
+{
+  "metrics": {
+    "rtt": 2,
+    "correction": 1.3687843065427688e-7,
+    "remotes": 3,
+    "viewTime": 6.3503747181774735,
+    "ai": [
+      {
+        "id": "95c6260283c3",
+        "rtt": 256,
+        "pending": 20,
+        "decisions": 29,
+        "online": true
+      },
+      {
+        "id": "7102ef21551b",
+        "rtt": 256,
+        "pending": 20,
+        "decisions": 29,
+        "online": true
+      },
+      {
+        "id": "e522d75c36cc",
+        "rtt": 256,
+        "pending": 20,
+        "decisions": 29,
+        "online": true
+      }
+    ]
+  },
+  "map": [
+    "234,215,187,255"
+  ],
+  "compact": {
+    "x": 24,
+    "y": 128,
+    "width": 240,
+    "height": 34
+  },
+  "server": {
+    "rssMB": 191.390625,
+    "heapMB": 68.150634765625,
+    "tickMs": 0.24748970187595282,
+    "maxTickMs": 2.7674999999999272,
+    "overruns": 0,
+    "connections": 0,
+    "bytes": 1217696,
+    "loopP95Ms": 32.276479
+  },
+  "errors": []
+}

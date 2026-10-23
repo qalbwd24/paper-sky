@@ -1,0 +1,11 @@
+{
+  "players": 4,
+  "simulatedSeconds": 60,
+  "elapsedMs": 1852.9022999999997,
+  "averageTickMs": 0.513929277777777,
+  "p95TickMs": 0.7876000000001113,
+  "maxTickMs": 4.857300000000123,
+  "rssMB": 136.7109375,
+  "heapMB": 55.85369110107422,
+  "estimatedJSONBytesPerSecond": 174720
+}

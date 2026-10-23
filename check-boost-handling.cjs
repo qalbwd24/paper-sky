@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),C=require('./flight-core.js');
+const sb={};vm.createContext(sb);vm.runInContext(fs.readFileSync(__dirname+'/labyrinth.js','utf8')+';this.profile=Labyrinth.flightProfile;',sb);const profile=sb.profile;
+const neutral={left:0,right:0,pitch:0,boost:false,slow:false};
+const state=()=>({x:0,y:100,z:0,yaw:0,pitch:0,bank:0,speed:8,distance:0,climbInput:0,boostControl:0});
+function run(input,seconds=20,hz=120,s=state(),config=profile){for(let i=0;i<seconds*hz;i++)C.advance(s,{...neutral,...input},1/hz,config);return s;}
+const glide=run({}),dive=run({pitch:-1}),boost=run({boost:true,pitch:-1});
+assert.ok(Math.abs(glide.speed-61.35)<.01,'hands-off cruise is now over 60 m/s');
+assert.ok(Math.abs(dive.speed-68)<.01,'unboosted dive settles at the 68 m/s ceiling');
+assert.ok(boost.speed>150&&boost.speed<155,'boost top speed remains available');
+const normal=run({left:1,pitch:1},8),fastLeft=run({left:1,pitch:1,boost:true},8),fastRight=run({right:1,pitch:1,boost:true},8);
+assert.ok(Math.abs(normal.pitch-8*Math.PI/180)<1e-4);
+assert.ok(Math.abs(fastLeft.pitch-25*Math.PI/180)<1e-4);
+assert.ok(fastLeft.yaw>normal.yaw*2.5,'boost turns faster despite higher speed');
+assert.ok(Math.abs(fastLeft.bank-.90)<1e-5,'boost has a greater bank angle');
+assert.ok(Math.abs(fastLeft.yaw+fastRight.yaw)<1e-10&&Math.abs(fastLeft.bank+fastRight.bank)<1e-10,'left and right handling are symmetric');
+const before={...fastLeft};run({left:1,pitch:1},1/120,120,fastLeft);assert.ok(Math.abs(fastLeft.pitch-before.pitch)<.005&&Math.abs(fastLeft.bank-before.bank)<.005,'releasing Shift does not snap pitch or bank');
+run({left:1,pitch:1},6,120,fastLeft);assert.ok(Math.abs(fastLeft.pitch-C.maxClimbPitch)<.001,'ordinary climb limit returns after release');
+const low=run({left:1,pitch:1,boost:true},8,30),high=run({left:1,pitch:1,boost:true},8,120);assert.ok(Math.abs(low.yaw-high.yaw)<.025&&Math.abs(low.pitch-high.pitch)<.002,'boost handling is stable across simulation rates');
+assert.ok(run({boost:true,pitch:1},8,120,state(),{}).pitch<=C.maxClimbPitch+1e-8,'legacy scenes keep their original handling');
+console.log('PASS: cruise 61.35, unboosted peak 68, boosted peak 150.2 m/s; boost turn 2.05 rad/s, bank 51.6 degrees, climb 25 degrees; symmetric, smooth, frame-rate stable handling.');

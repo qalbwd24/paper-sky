@@ -1,0 +1,64 @@
+﻿# 公开仓库排除项
+
+# 第三方游戏素材（Unity 4.3 PaperPlane / Steam PaperSkyDemo 提取），仅本地保留
+/assets/paperplane-original/
+/assets/papersky-plane/
+
+# 反编译与 mod 构建产物
+/native-mod/
+/papersky-mod/
+/scene-flight/
+
+# 交付包、备份、更新快照
+/backups/
+/本地更新记录/
+/联机交付/
+/references/
+
+# 服务器部署与局域网调试资料
+/HANDOFF.md
+/online/DEPLOY.md
+/online/SERVER-PATCH.md
+/online/UPDATE-*.md
+/online/prepare-server-patch.py
+/online/test-server-patch.py
+/online/private-data/
+/online/references/
+/online/node_modules/
+
+# Windows 快捷方式（含本机绝对路径）
+*.lnk
+*.url
+
+# 浏览器 QA 脚本：硬编码本机 Codex 运行时的 Playwright 路径
+/check-ai-view.cjs
+/check-chase.cjs
+/check-chase-play.cjs
+/check-chase-vfx.cjs
+/check-combat-browser.cjs
+/check-combat-physics.cjs
+/check-combat-stability.cjs
+/check-combat-visual.cjs
+/check-original-plane.cjs
+/check-papersky-plane.cjs
+/check-planet-browser.cjs
+/check-shadow-shape.cjs
+/check-soft-collision.cjs
+/check-tokyo.cjs
+/check-tokyo-compact.cjs
+/check-tokyo-districts.cjs
+/check-tokyo-flight.cjs
+/check-tokyo-landmarks.cjs
+/inspect-bird-shader.cjs
+/inspect-tokyo.cjs
+/qa-visual.cjs
+
+# 工具与日志
+node_modules/
+*.log
+tmp/
+/online/check-browser.cjs
+/online/check-presence-browser.cjs
+/online/check-proxy-browser.cjs
+__pycache__/
+*.pyc

@@ -1,0 +1,15 @@
+{
+  "name": "paper-chase-online",
+  "version": "1.5.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.cjs",
+    "test": "node --test test.cjs test-proxy.cjs test-pursuit.cjs test-capture.cjs test-contact.cjs test-handling.cjs admin.test.cjs"
+  },
+  "dependencies": {
+    "ws": "8.21.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
