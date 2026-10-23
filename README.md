@@ -109,3 +109,14 @@ Three.js 0.160.1 随项目提供，许可证见 `vendor/THREE-LICENSE.txt`。所
 
 飞行形象菜单新增「PaperSky · 动态纸飞机」，支持转弯、爬升、加速收翼和慢飞展开。按原有翼展等比缩放，沿用各场景既有的尺寸、操控与碰撞流程。主游戏首次打开此更新会选中新模型，以后保留你的皮肤选择；湖山星球和小东京可在菜单选择。来源、比例和验证说明见 assets/papersky-plane/来源与接入.md。
 
+
+## 仓库说明（公开发布）
+
+本仓库只收录自写代码与可再分发的素材。以下内容未入库，仅保留在本地工作目录：
+
+- `assets/paperplane-original/`、`assets/papersky-plane/`：从 Unity 4.3《PaperPlane》与 Steam《PaperSkyDemo》提取的原作模型与贴图，版权不属于本项目；
+- `native-mod/`、`papersky-mod/`、`scene-flight/`：含反编译的原作 Assembly-CSharp 与 mod 构建产物；
+- `references/`、`backups/`、`本地更新记录/`、`联机交付/`：调研资料、备份与交付包；
+- 服务器部署文档（`HANDOFF.md`、`online/DEPLOY.md`、`online/SERVER-PATCH.md`、`online/UPDATE-*.md`）与硬编码本机运行时路径的浏览器 QA 脚本。
+
+第三人称素材的署名与许可见 `assets/kenney-*/License.txt`、`assets/littlest-tokyo/来源与许可证.md`、`assets/tiny-treats-house/`。
