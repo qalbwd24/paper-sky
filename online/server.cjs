@@ -1,7 +1,9 @@
 'use strict';
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{performance,monitorEventLoopDelay}=require('node:perf_hooks'),{WebSocketServer}=require('ws'),{Rooms,hash}=require('./rooms.cjs'),{P}=require('./world.cjs');
-const root=path.resolve(__dirname,'..'),prefix='/chase',runtime=['local-hall.html','index.html','style.css','game.js','online.html','online.css','paper-online.js','chase-net-view.js','paper-online-ai.js','paper-pursuit.js','chase-map.js','room-browser.js','room-browser.css','chase-net-physics.js','vendor/three.min.js','flight-core.js','ink-bird.js','original-plane.js','papersky-plane.js','assets/papersky-plane/plane-data.js','paper.js','valley.js','classroom.js','atrium-layout.js','atrium.js','flight-effects.js','paper-city-style.js','labyrinth.js','flight-contact.js','paper-pilot.js','paper-chase.js','paper-combat.js','assets/paperplane-original/plane-data.js','assets/paperplane-original/_MainTex.png','assets/ink-bird-fan-clean.png'];
+const {createDecisionBridge}=require('./decision-bridge.cjs');
+const root=path.resolve(__dirname,'..'),prefix='/chase',runtime=['local-hall.html','index.html','style.css','game.js','online.html','online.css','paper-online.js','chase-net-view.js','paper-online-ai.js','paper-online-ds.js','paper-pursuit.js','chase-map.js','room-browser.js','room-browser.css','chase-net-physics.js','vendor/three.min.js','flight-core.js','ink-bird.js','original-plane.js','papersky-plane.js','assets/papersky-plane/plane-data.js','paper.js','valley.js','classroom.js','atrium-layout.js','atrium.js','flight-effects.js','paper-city-style.js','labyrinth.js','flight-contact.js','paper-pilot.js','paper-chase.js','paper-combat.js','assets/paperplane-original/plane-data.js','assets/paperplane-original/_MainTex.png','assets/ink-bird-fan-clean.png'];
 function createServer(options={}){
+ const decisionBridge=options.decisionBridge||createDecisionBridge();
  const rooms=options.rooms||new Rooms({maxRooms:Math.max(1,Math.min(4,Number(process.env.MAX_ROOMS)||2))}),origin=options.origin||process.env.PUBLIC_ORIGIN||'',dataFile=options.dataFile??process.env.DATA_FILE??path.join(__dirname,'private-data','rooms.json'),connections=new Map(),limits=new Map();
  if(dataFile&&fs.existsSync(dataFile))rooms.load(JSON.parse(fs.readFileSync(dataFile,'utf8')));
  let closing=false,dirty=false,saveAt=0,last=performance.now(),acc=0,frames=0,tickMs=0,maxTickMs=0,overruns=0,bytes=0;
@@ -36,12 +38,25 @@ function createServer(options={}){
   if(pathname.startsWith(prefix+'/api/')){
    if(!rate('http:'+ip,120,10000))return json(res,429,{error:'操作过于频繁'});
    if(req.method==='POST'&&!sameOrigin(req))return json(res,403,{error:'请求来源无效'});
+   if(pathname===prefix+'/api/ai/status'&&req.method==='GET')return json(res,200,decisionBridge.status());
    if(pathname===prefix+'/api/health')return json(res,200,{ok:true,version:'paper-chase-online-7',rooms:rooms.rooms.size,maxRooms:rooms.maxRooms,tickHz:60,snapshotHz:20,performance:metrics()});
    if(pathname===prefix+'/api/session'&&req.method==='GET'){if(!identity(req))res.setHeader('Set-Cookie',`paper_chase=${crypto.randomBytes(32).toString('hex')}; Path=/chase/; HttpOnly; SameSite=Strict; Max-Age=2592000${origin.startsWith('https:')?'; Secure':''}`);return json(res,200,{ok:true});}
    const who=identity(req);if(!who)return json(res,401,{error:'请刷新页面重新连接'});
    if([prefix+'/api/rooms',prefix+'/api/lobby'].includes(pathname)&&req.method==='GET')return json(res,200,{rooms:[...rooms.rooms.values()].map(r=>({id:r.id,name:(r.players.find(p=>p.identity===r.owner)?.name||'纸翼旅人')+'的追逐赛',capacity:4,public:r.public===true,joinable:r.public===true&&r.players.length<4,phase:r.running?'playing':'waiting',count:r.players.length,online:r.players.filter(p=>p.online).length,running:r.running,mine:!!rooms.member(r,who),host:r.players.find(p=>p.identity===r.owner)?.name,players:r.players.map(p=>({name:p.name,online:p.online}))}))});
    if(req.method!=='POST')return json(res,404,{error:'接口不存在'});
-   const b=await body(req);if(!rate('action:'+who,20,10000))return json(res,429,{error:'操作过于频繁'});
+   const b=await body(req);
+   if([prefix+'/api/ai/plan',prefix+'/api/ai/judge'].includes(pathname)){
+    if(!decisionBridge.status().enabled)return json(res,503,{error:'请先在本地配置 AI_BRIDGE_ENABLED 和模型 API Key'});
+    const kind=pathname.endsWith('/plan')?'plan':'judge';
+    const r=rooms.rooms.get(b.room),owner=r&&rooms.member(r,who);
+    const bot=r?.players.find(p=>p.kind==='bot'&&p.id===b.bot&&p.proxy===owner?.id);
+    if(!bot)return json(res,403,{error:'没有控制这个 AI 的权限'});
+    if(!b.state||typeof b.state!=='object'||Array.isArray(b.state))return json(res,400,{error:'无效的 AI 状态'});
+    if(!rate('ai:'+who+':'+b.bot+':'+kind,kind==='plan'?1:4,kind==='plan'?1800:1000))return json(res,429,{error:'AI 决策频率受限'});
+    try{return json(res,200,await decisionBridge.decide(kind,b.state));}
+    catch(e){return json(res,502,{error:e.message});}
+   }
+   if(!rate('action:'+who,20,10000))return json(res,429,{error:'操作过于频繁'});
    if(pathname===prefix+'/api/create'){const {r,invite}=rooms.create(who,b.name,b.skin,b.public);dirty=true;return json(res,200,{room:r.id,invite});}
    const r=rooms.rooms.get(b.room);if(pathname===prefix+'/api/leave'&&(!r||!rooms.member(r,who)))return json(res,200,{ok:true});if(!r)return json(res,404,{error:'房间已解散或过期'});
    if(pathname===prefix+'/api/join'){rooms.join(r,who,b.name,b.skin,b.invite);dirty=true;return json(res,200,{room:r.id});}
