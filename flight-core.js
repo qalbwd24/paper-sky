@@ -43,21 +43,24 @@
     }
   }
   function advance(s,input,dt,config={}){
+    if(config.forSpeed)config=config.forSpeed(s.speed,config);
     const scale=config.speedScale||1;
     // Blend handling on Shift transitions, so extra agility never snaps the attitude.
     s.boostControl=(s.boostControl||0)+((input.boost?1:0)-(s.boostControl||0))*(1-Math.exp(-4*dt));
     const boost=s.boostControl,blend=(normal,accelerated)=>normal+((accelerated??normal)-normal)*boost;
     const climbLimit=blend(config.maxClimbPitch??maxClimbPitch,config.boostClimbPitch);
     const turnRate=blend(config.turnRate||.75,config.boostTurnRate),bankLimit=blend(config.bankAngle??.48,config.boostBankAngle);
-    const lerp=1-Math.exp(-(input.pitch<0?blend(config.diveResponse??3,config.boostDiveResponse):blend(config.pitchResponse??2.3,config.boostPitchResponse))*dt),turn=input.left-input.right;
+    const activePitchRate=input.pitch<0?blend(config.diveResponse??3,config.boostDiveResponse):blend(config.pitchResponse??2.3,config.boostPitchResponse),turn=input.left-input.right;
     // Build lift progressively. Smoothstep has a flat onset, so a short key tap
     // cannot yank the nose upward; full lift leaves only a small climb surplus.
     const liftCommand=clamp(input.pitch,0,1);
-    s.climbInput=(s.climbInput||0)+(liftCommand-(s.climbInput||0))*(1-Math.exp(-(liftCommand>0?blend(config.liftResponse??3,config.boostLiftResponse):blend(config.liftReleaseResponse??4.5,config.boostLiftReleaseResponse))*dt));
+    const releaseRate=input.pitch<0?blend(config.liftReleaseResponse??4.5,config.boostLiftReleaseResponse):blend(config.glideLiftReleaseResponse??config.liftReleaseResponse??4.5,config.boostGlideLiftReleaseResponse??config.boostLiftReleaseResponse);
+    s.climbInput=(s.climbInput||0)+(liftCommand-(s.climbInput||0))*(1-Math.exp(-(liftCommand>0?blend(config.liftResponse??3,config.boostLiftResponse):releaseRate)*dt));
     const lift=s.climbInput*s.climbInput*(3-2*s.climbInput);
     const restPitch=config.trimPitch??trimPitch;
-    const targetPitch=input.pitch<0?input.pitch*.72:restPitch+(climbLimit-restPitch)*lift;
-    s.pitch+=(targetPitch-s.pitch)*lerp;
+    const targetPitch=input.pitch<0?input.pitch*(config.diveLimit??.72):restPitch+(climbLimit-restPitch)*lift;
+    const pitchRate=input.pitch===0&&targetPitch<s.pitch?blend(config.glidePitchResponse??config.pitchResponse??2.3,config.boostGlidePitchResponse??config.boostPitchResponse):activePitchRate;
+    s.pitch+=(targetPitch-s.pitch)*(1-Math.exp(-pitchRate*dt));
     s.bank+=(turn*bankLimit-s.bank)*(1-Math.exp(-4*dt));
     s.yaw+=turn*turnRate*dt;
     const speedLimit=input.boost?(config.maxSpeed||Infinity):Math.min(config.cruiseMaxSpeed||Infinity,config.maxSpeed||Infinity);

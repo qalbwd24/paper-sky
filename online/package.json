@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server.cjs",
-    "test": "node --test test.cjs test-proxy.cjs test-pursuit.cjs test-capture.cjs test-contact.cjs test-handling.cjs admin.test.cjs"
+    "test": "node --test test.cjs test-proxy.cjs test-pursuit.cjs test-capture.cjs test-contact.cjs test-handling.cjs admin.test.cjs nickname-server.test.cjs"
   },
   "dependencies": {
     "ws": "8.21.3"

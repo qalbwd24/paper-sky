@@ -51,7 +51,7 @@ function createPaperPlane(renderer){
   }
   const texture=scratchTexture();
   const math=new THREE.MeshStandardMaterial({color:'#ffffff',map:texture,roughness:.92,metalness:0,side:THREE.DoubleSide});
-  const mechanical=new THREE.MeshStandardMaterial({color:'#ffffff',map:scratchTexture(true),roughness:.92,metalness:0,side:THREE.DoubleSide});
+  let mechMat=null;const mechanical=()=>mechMat||(mechMat=new THREE.MeshStandardMaterial({color:'#ffffff',map:scratchTexture(true),roughness:.92,metalness:0,side:THREE.DoubleSide}));
   const white=new THREE.MeshStandardMaterial({color:'#fffaf0',roughness:.92,metalness:0,side:THREE.DoubleSide});
   const nose=[0,0,-L/2],left=[-W/2,.002,L/2],right=[W/2,.002,L/2],lr=[-.006,-.002,.106],rr=[.006,-.002,.106],ridge=[0,-.003,.112],keel=[0,-.014,.118];
   const positions=[],uv=[];
@@ -59,13 +59,19 @@ function createPaperPlane(renderer){
   tri(nose,left,lr);tri(nose,rr,right);tri(nose,lr,ridge);tri(nose,ridge,rr);tri(nose,keel,lr);tri(nose,rr,keel);tri(lr,keel,ridge);tri(ridge,keel,rr);
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.computeVertexNormals();
   const mesh=new THREE.Mesh(g,math);mesh.castShadow=true;mesh.receiveShadow=false;group.add(mesh);
-  group.userData.createOpponent=color=>{const enemy=new THREE.Group();enemy.scale.copy(group.scale);const material=white.clone();material.color.set(color);material.emissive=new THREE.Color(color);material.emissiveIntensity=.12;const body=new THREE.Mesh(g.clone(),material);body.castShadow=true;enemy.add(body);enemy.add(new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry,10),new THREE.LineBasicMaterial({color:'#493f52',transparent:true,opacity:.6})));const original=typeof createOriginalPlane==='function'?createOriginalPlane(renderer,color):null;if(original){enemy.add(original.group);original.group.visible=false;}const papersky=typeof createPaperSkyPlane==='function'?createPaperSkyPlane(renderer,color):null;if(papersky){enemy.add(papersky.group);papersky.group.visible=false;}enemy.userData.papersky=papersky;enemy.userData.original=original;enemy.userData.body=body;enemy.userData.setModel=skin=>{const useSky=skin==='papersky'&&papersky;if(papersky)papersky.group.visible=!!useSky;const use=skin==='original'&&original;body.visible=enemy.children[1].visible=!use&&!useSky;if(original)original.group.visible=!!use;enemy.userData.body=useSky?papersky.mesh:use?original.mesh:body;};enemy.userData.updatePose=(dt,state)=>{if(papersky?.group.visible)papersky.update(dt,state);if(original?.group.visible)original.update(dt,state);};enemy.userData.dimensions={length:L*.7,wingspan:W*.7};return enemy;};
+  group.userData.createOpponent=color=>{const enemy=new THREE.Group();enemy.scale.copy(group.scale);const material=white.clone();material.color.set(color);material.emissive=new THREE.Color(color);material.emissiveIntensity=.12;const body=new THREE.Mesh(g.clone(),material);body.castShadow=true;enemy.add(body);enemy.add(new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry,10),new THREE.LineBasicMaterial({color:'#493f52',transparent:true,opacity:.6})));const original=typeof createOriginalPlane==='function'&&typeof OriginalPlaneData!=='undefined'?createOriginalPlane(renderer,color):null;if(original){enemy.add(original.group);original.group.visible=false;}const papersky=typeof createPaperSkyPlane==='function'&&typeof PaperSkyPlaneData!=='undefined'?createPaperSkyPlane(renderer,color):null;if(papersky){enemy.add(papersky.group);papersky.group.visible=false;}enemy.userData.papersky=papersky;enemy.userData.original=original;enemy.userData.body=body;enemy.userData.setModel=skin=>{const useSky=skin==='papersky'&&papersky;if(papersky)papersky.group.visible=!!useSky;const use=skin==='original'&&original;body.visible=enemy.children[1].visible=!use&&!useSky;if(original)original.group.visible=!!use;enemy.userData.body=useSky?papersky.mesh:use?original.mesh:body;};enemy.userData.updatePose=(dt,state)=>{if(papersky?.group.visible)papersky.update(dt,state);if(original?.group.visible)original.update(dt,state);};enemy.userData.dimensions={length:L*.7,wingspan:W*.7};return enemy;};
   const lines=new THREE.LineSegments(new THREE.EdgesGeometry(g,10),new THREE.LineBasicMaterial({color:'#999786',transparent:true,opacity:.38}));group.add(lines);
   group.userData.wingTips=[new THREE.Vector3(...left),new THREE.Vector3(...right)];
   group.userData.probes=[new THREE.Vector3(...nose),new THREE.Vector3(...left),new THREE.Vector3(...right),new THREE.Vector3(0,-.018,.045),new THREE.Vector3(...keel)];
-  const skyPlane=typeof createPaperSkyPlane==='function'?createPaperSkyPlane(renderer):null;if(skyPlane){group.add(skyPlane.group);skyPlane.group.visible=false;}group.userData.papersky=skyPlane;
-  const imported=typeof createOriginalPlane==='function'?createOriginalPlane(renderer):null;if(imported){group.add(imported.group);imported.group.visible=false;}group.userData.imported=imported;
-  const paperProbes=group.userData.probes.map(v=>v.clone()),bird=createInkBird();group.add(bird.group);
+  // Alternate skins are built only when selected. Each costs real time/memory:
+  // PaperSky decodes ~2.4 MB of base64, PaperPlane builds a skinned rig,
+  // the ink bird fetches a 1.7 MB texture.
+  let skyPlane=null,imported=null,bird=null;
+  const ensureSky=()=>{if(!skyPlane&&typeof createPaperSkyPlane==='function'&&typeof PaperSkyPlaneData!=='undefined'){skyPlane=createPaperSkyPlane(renderer);skyPlane.group.visible=false;group.add(skyPlane.group);group.userData.papersky=skyPlane;}return skyPlane;};
+  const ensureImported=()=>{if(!imported&&typeof createOriginalPlane==='function'&&typeof OriginalPlaneData!=='undefined'){imported=createOriginalPlane(renderer);imported.group.visible=false;group.add(imported.group);group.userData.imported=imported;}return imported;};
+  const ensureBird=()=>{if(!bird&&typeof createInkBird==='function'){bird=createInkBird();bird.group.visible=false;group.add(bird.group);}return bird;};
+  group.userData.ensureSky=ensureSky;group.userData.ensureImported=ensureImported;group.userData.ensureBird=ensureBird;
+  const paperProbes=group.userData.probes.map(v=>v.clone());
   group.userData.dimensions={length:L*.7,wingspan:W*.7,sourceSheet:[.21,.297]};
   // Deform only the paper, never the camera or flight body. No periodic flapping or noise.
   const rest=new Float32Array(g.attributes.position.array),edgeRest=new Float32Array(lines.geometry.attributes.position.array);
@@ -89,27 +95,28 @@ function createPaperPlane(renderer){
   }
   // Bounds include the millimetre-scale flex, preventing wing-tip culling.
   for(const geometry of [g,lines.geometry]){geometry.computeBoundingSphere();geometry.boundingSphere.radius+=.012;}
-  function syncBirdTips(){bird.tips.forEach((v,i)=>group.userData.wingTips[i].copy(v));}
-  group.userData.resetPose=()=>{skyPlane?.reset();imported?.reset();pose.climb=pose.dive=pose.bank=0;applyPose();bird.reset();if(group.userData.skin==='inkbird')syncBirdTips();if(group.userData.skin==='papersky')skyPlane.tips.forEach((v,i)=>group.userData.wingTips[i].copy(v));if(group.userData.skin==='original')imported.tips.forEach((v,i)=>group.userData.wingTips[i].copy(v));};
+  function syncBirdTips(){if(!bird)return;bird.tips.forEach((v,i)=>group.userData.wingTips[i].copy(v));}
+  group.userData.resetPose=()=>{skyPlane?.reset();imported?.reset();pose.climb=pose.dive=pose.bank=0;applyPose();if(bird)bird.reset();if(group.userData.skin==='inkbird')syncBirdTips();if(group.userData.skin==='papersky')skyPlane.tips.forEach((v,i)=>group.userData.wingTips[i].copy(v));if(group.userData.skin==='original')imported.tips.forEach((v,i)=>group.userData.wingTips[i].copy(v));};
   group.userData.updatePose=(dt,{pitch=0,bank=0,active=false,boost=0,slow=false,impact=0})=>{
     if(group.userData.skin==='papersky'&&skyPlane){skyPlane.update(dt,{pitch,bank,active,boost,slow,impact});skyPlane.tips.forEach((v,i)=>group.userData.wingTips[i].copy(v));return;}
     if(group.userData.skin==='original'&&imported){imported.update(dt,{pitch,bank,active});imported.tips.forEach((v,i)=>group.userData.wingTips[i].copy(v));return;}
-    if(group.userData.skin==='inkbird'){bird.update(dt,{pitch,bank,active});syncBirdTips();return;}
+    if(group.userData.skin==='inkbird'){const b=ensureBird();if(b){b.update(dt,{pitch,bank,active});syncBirdTips();}return;}
     if(dt<=0)return;
     const target={climb:active?Math.pow(clamp(pitch/.44,0,1),.8):0,dive:active?Math.pow(clamp((-pitch-.12)/.7,0,1),.8):0,bank:active?clamp(bank/.9,-1,1):0};
     const f=1-Math.exp(-7*dt);let changed=false;
     for(const k of ['climb','dive','bank']){const delta=(target[k]-pose[k])*f;if(Math.abs(delta)>1e-7){pose[k]+=delta;changed=true;}}
     if(changed)applyPose();
   };
-  Object.defineProperty(group.userData,'pose',{get:()=>group.userData.skin==='papersky'?skyPlane.pose:group.userData.skin==='original'?imported.pose:group.userData.skin==='inkbird'?bird.pose:pose});
+  Object.defineProperty(group.userData,'pose',{get:()=>{const s=group.userData.skin;if(s==='papersky'&&skyPlane)return skyPlane.pose;if(s==='original'&&imported)return imported.pose;if(s==='inkbird'&&bird)return bird.pose;return pose;}});
   group.userData.setSkin=skin=>{
+    if(skin==='papersky')ensureSky();else if(skin==='original')ensureImported();else if(skin==='inkbird')ensureBird();
     skin=['white','math','mechanical','inkbird',...(imported?['original']:[]),...(skyPlane?['papersky']:[])].includes(skin)?skin:'math';
     const isSky=skin==='papersky';if(skyPlane)skyPlane.group.visible=isSky;const isOriginal=skin==='original';if(imported)imported.group.visible=isOriginal;const isBird=skin==='inkbird';group.userData.skin=skin;
-    mesh.visible=lines.visible=!isBird&&!isOriginal&&!isSky;bird.group.visible=isBird;
-    if(!isBird&&!isOriginal&&!isSky)mesh.material={white,math,mechanical}[skin];
-    group.userData.dimensions=isSky?{...skyPlane.dimensions}:isOriginal?{...imported.dimensions}:isBird?{...bird.dimensions}:{length:L*.7,wingspan:W*.7,sourceSheet:[.21,.297]};
+    mesh.visible=lines.visible=!isBird&&!isOriginal&&!isSky;if(bird)bird.group.visible=isBird;
+    if(!isBird&&!isOriginal&&!isSky)mesh.material=skin==='mechanical'?mechanical():{white,math}[skin];
+    group.userData.dimensions=isSky?{...skyPlane.dimensions}:isOriginal?{...imported.dimensions}:isBird&&bird?{...bird.dimensions}:{length:L*.7,wingspan:W*.7,sourceSheet:[.21,.297]};
     // Keep Vector3 identities because the sweep caches their references.
-    group.userData.probes.forEach((v,i)=>isSky?v.copy(skyPlane.probes[i]):isOriginal?v.copy(imported.probes[i]):isBird?v.fromArray(bird.probes[i]):v.copy(paperProbes[i]));
+    group.userData.probes.forEach((v,i)=>isSky?v.copy(skyPlane.probes[i]):isOriginal?v.copy(imported.probes[i]):isBird&&bird?v.fromArray(bird.probes[i]):v.copy(paperProbes[i]));
     group.userData.resetPose();
   };group.userData.setSkin('math');
   return group;

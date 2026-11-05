@@ -1,6 +1,6 @@
 .onlineGame #welcome,.onlineGame #combatOverlay,.onlineGame #paused,.onlineGame #layoutButton,.onlineGame #scene,.onlineGame #mazeFloor,.onlineGame #shuffleMaze,.onlineGame #combatMode,.onlineGame #raceRole,.onlineGame #enemyColor,.onlineGame #aimAssist,.onlineGame #viewTarget,.onlineGame #reset,.onlineGame #help,.onlineGame .shortcuts span:nth-last-of-type(-n+2){display:none!important}
 .onlineGame nav a:not(.hallLink){display:none}.hallLink{color:#46645d;background:#fffaeccc;padding:9px;border-radius:5px;font-size:12px;text-decoration:none}
-#onlineUI{position:absolute;inset:0;pointer-events:none;z-index:4;font-size:12px}#onlineUI button,#onlineUI input,#onlineUI select{font:inherit;border:1px solid #c6c9b8;border-radius:5px;padding:8px;background:#fffbee;color:#35594d}#onlineUI button{cursor:pointer}#onlineUI button:hover{background:#e4ecd9}#onlineUI button:disabled{opacity:.5;cursor:default}#onlineUI label{display:block;margin:9px 0}#netLobby{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,90vw);max-height:80vh;overflow:auto;padding:28px;background:#fbf5e8f5;border:1px solid #fff;border-radius:12px;pointer-events:auto;box-shadow:0 15px 80px #283f3733}#netLobby h2{font-size:30px}#netLobby p,#netLobby small{line-height:1.9}#netName{width:80%}#netCreate,#netInviteJoin{background:#41665b!important;color:white!important;margin:5px 6px 14px 0}#netRoom{position:absolute;top:145px;left:24px;width:290px;padding:12px;background:#faf2e4e8;border-radius:8px;pointer-events:auto}#netRoom summary{cursor:pointer;font-weight:600}.netMember{padding:6px 0;font-size:11px;border-bottom:1px solid #687c651a}.netActions{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}#netInvite{font-size:10px!important;width:100%}#netMessage{position:absolute;top:112px;left:50%;transform:translateX(-50%);padding:8px 14px;color:#375749;background:#fff4dbde;border-radius:6px;text-align:center;max-width:70%;pointer-events:none}#netMessage:empty{display:none}#netMessage.error{color:#ac3940}#netStatus{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);padding:9px;background:#fff5e8ed;border-radius:5px;max-width:85vw;text-align:center}#netStatus:empty{display:none}#netCues{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}.netCue{position:absolute;transform:translate(-50%,-140%);background:#fff7dae6;border:1px solid #dcac5c;border-radius:12px;padding:3px 7px;color:#946b23;font-size:12px;white-space:nowrap}.netCue.hunter{color:#c72949;border-color:#d94765}#netProgress{position:absolute;width:82px;height:82px;transform:translate(-50%,-50%);display:grid;align-items:end;text-align:center;color:#fff;font-weight:bold;text-shadow:0 1px 3px #243e34}#netProgress::before{content:"";position:absolute;inset:0;background:conic-gradient(#ffe69a var(--progress,0deg),#fff8dd66 0);border-radius:50%;mask:radial-gradient(circle,transparent 62%,black 65%)}@media(max-width:1100px){#netStatus{bottom:150px}#netRoom{top:190px;width:240px;font-size:10px}#netMessage{top:155px}}@media(max-height:650px){#netRoom{max-height:50vh;overflow:auto}#netLobby{max-height:85vh;padding:18px}}
+#onlineUI{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:4;font-size:12px}#onlineUI button,#onlineUI input,#onlineUI select{font:inherit;border:1px solid #c6c9b8;border-radius:5px;padding:8px;background:#fffbee;color:#35594d}#onlineUI button{cursor:pointer}#onlineUI button:hover{background:#e4ecd9}#onlineUI button:disabled{opacity:.5;cursor:default}#onlineUI label{display:block;margin:9px 0}#netLobby{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,90vw);max-height:80vh;overflow:auto;padding:28px;background:#fbf5e8f5;border:1px solid #fff;border-radius:12px;pointer-events:auto;box-shadow:0 15px 80px #283f3733}#netLobby h2{font-size:30px}#netLobby p,#netLobby small{line-height:1.9}#netName{width:80%}#netCreate,#netInviteJoin{background:#41665b!important;color:white!important;margin:5px 6px 14px 0}#netRoom{position:absolute;top:145px;left:24px;width:290px;padding:12px;background:#faf2e4e8;border-radius:8px;pointer-events:auto}#netRoom summary{cursor:pointer;font-weight:600}.netMember{padding:6px 0;font-size:11px;border-bottom:1px solid #687c651a}.netActions{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}#netInvite{font-size:10px!important;width:100%}#netMessage{position:absolute;top:112px;left:50%;transform:translateX(-50%);padding:8px 14px;color:#375749;background:#fff4dbde;border-radius:6px;text-align:center;max-width:70%;pointer-events:none}#netMessage:empty{display:none}#netMessage.error{color:#ac3940}#netStatus{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);padding:9px;background:#fff5e8ed;border-radius:5px;max-width:85vw;text-align:center}#netStatus:empty{display:none}#netCues{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:3;overflow:hidden}.netCue{position:absolute;transform:translate(-50%,-140%);background:#fff7dae6;border:1px solid #dcac5c;border-radius:12px;padding:3px 7px;color:#946b23;font-size:12px;white-space:nowrap}.netCue.hunter{color:#c72949;border-color:#d94765}#netProgress{position:absolute;width:82px;height:82px;transform:translate(-50%,-50%);display:grid;align-items:end;text-align:center;color:#fff;font-weight:bold;text-shadow:0 1px 3px #243e34}#netProgress::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;background:conic-gradient(#ffe69a var(--progress,0deg),#fff8dd66 0);border-radius:50%;-webkit-mask:radial-gradient(circle,transparent 62%,black 65%);mask:radial-gradient(circle,transparent 62%,black 65%)}@media(max-width:1100px){#netStatus{bottom:150px}#netRoom{top:190px;width:240px;font-size:10px}#netMessage{top:155px}}@media(max-height:650px){#netRoom{max-height:50vh;overflow:auto}#netLobby{max-height:85vh;padding:18px}}
 .onlineGame footer .telemetry{min-width:0;gap:16px;padding:8px 12px}.onlineGame footer .telemetry strong{font-size:18px}.onlineGame footer .telemetry .status,.onlineGame footer .telemetry>div:nth-child(3){display:none}.onlineGame footer .shortcuts{font-size:8px;gap:10px}.onlineGame #mapCanvas{width:120px;height:120px}
 #onlineUI #netNavigation{position:absolute;left:24px;top:88px;display:flex;gap:6px;pointer-events:auto}#onlineUI #netNavigation button{padding:7px 10px;font-size:12px}#onlineUI #netRoom{top:128px;left:24px;width:240px;padding:9px 11px;max-height:calc(100vh - 285px);overflow:auto}#netRoom:not([open]){width:max-content;max-width:240px}#netRoom .netMember{padding:5px 0;font-size:10px;line-height:1.6}#netRoom button,#netRoom select{padding:5px 7px;font-size:10px}#netRoom label{margin:6px 0}#netTools{margin-top:9px;border-top:1px solid #77886b33;padding-top:8px}#netTools summary{font-size:10px;color:#697b68}#netAITools{margin:8px 0}#netAITools small,#netAISummary{font-size:9px;line-height:1.6;color:#697b68}#netMessage{max-width:55%;top:90px;font-size:11px}#netStatus{bottom:22px;font-size:11px;white-space:normal;max-width:55vw}.onlineGame #location{top:unset!important;bottom:136px;left:36px;font-size:9px;padding:4px 8px;max-width:220px}
 @media(max-width:1100px){#onlineUI #netNavigation{top:110px;left:20px}#onlineUI #netRoom{top:148px;left:20px;width:220px}#netStatus{bottom:85px;max-width:80vw}#netMessage{top:110px;left:auto;right:20px;transform:none;max-width:50%}.onlineGame #mapCanvas{width:100px;height:100px}}
@@ -22,8 +22,8 @@
 #onlineUI #netStart,#onlineUI #netCreate,#onlineUI #netInviteJoin{background:#30584f;color:#fff}
 #onlineUI #netDissolve{color:#963c3b;border-color:#c79c92}
 #onlineUI #netLobby,#onlineUI #netRoom{background:var(--room-paper);border:1px solid var(--room-border);border-radius:14px;box-shadow:0 10px 30px #243a3226;scrollbar-gutter:stable;overscroll-behavior:contain}
-#onlineUI #netLobby{max-height:calc(100dvh - 220px);padding:22px}
-#onlineUI #netRoom{top:154px;width:300px;max-height:calc(100dvh - 270px);padding:12px}
+#onlineUI #netLobby{max-height:calc(100vh - 220px);max-height:calc(100dvh - 220px);padding:22px}
+#onlineUI #netRoom{top:154px;width:300px;max-height:calc(100vh - 270px);max-height:calc(100dvh - 270px);padding:12px}
 #onlineUI #netRoom:not([open]){width:max-content;max-width:calc(100vw - 32px)}
 #onlineUI #netNavigation{top:90px;gap:6px;max-width:calc(100vw - 32px)}
 #onlineUI #netNavigation button{min-height:44px;padding:8px 10px;font-size:12px}
@@ -41,8 +41,8 @@
 @media(max-width:600px){
  .onlineGame header{padding:10px 12px}.onlineGame .brand p{display:none}.onlineGame nav{max-height:54px;overflow:auto}
  #onlineUI #netNavigation{top:84px;left:12px;max-width:calc(100vw - 24px)}
- #onlineUI #netRoom{top:190px;left:12px;width:calc(100vw - 24px);max-height:calc(100dvh - 290px)}
- #onlineUI #netLobby{top:190px;transform:translateX(-50%);width:calc(100vw - 24px);max-height:calc(100dvh - 205px);padding:18px}
+ #onlineUI #netRoom{top:190px;left:12px;width:calc(100vw - 24px);max-height:calc(100vh - 290px);max-height:calc(100dvh - 290px)}
+ #onlineUI #netLobby{top:190px;transform:translateX(-50%);width:calc(100vw - 24px);max-height:calc(100vh - 205px);max-height:calc(100dvh - 205px);padding:18px}
  #netConnection{top:136px;left:12px;right:auto;padding:4px 8px}
  #netMessage{top:136px;left:112px;right:12px;max-width:none;font-size:11px;padding:5px 8px}
  #netStatus{max-width:calc(100vw - 24px);width:max-content;bottom:80px;font-size:10px}
@@ -50,8 +50,8 @@
 }
 @media(max-height:500px) and (min-width:601px){
  #onlineUI #netNavigation{top:62px;left:12px}
- #onlineUI #netRoom{top:114px;left:12px;width:300px;max-height:calc(100dvh - 130px)}
- #onlineUI #netLobby{top:114px;transform:translateX(-50%);max-height:calc(100dvh - 130px);padding:16px}
+ #onlineUI #netRoom{top:114px;left:12px;width:300px;max-height:calc(100vh - 130px);max-height:calc(100dvh - 130px)}
+ #onlineUI #netLobby{top:114px;transform:translateX(-50%);max-height:calc(100vh - 130px);max-height:calc(100dvh - 130px);padding:16px}
  #netConnection{top:64px;right:12px}#netMessage{top:110px;right:12px;max-width:calc(100vw - 340px)}
  #netStatus{left:auto;right:12px;transform:none;bottom:12px;max-width:calc(100vw - 340px)}
  .onlineGame #map,.onlineGame footer{display:none}
@@ -60,3 +60,107 @@
 #netLobby room-browser{display:block;margin:16px 0}.roomVisibility{display:flex!important;align-items:center;gap:8px}.roomVisibility input[type=checkbox]{width:auto!important}#mapLabel{max-width:160px;white-space:normal}
 
 #netCaptureStatus{position:absolute;bottom:58px;left:50%;transform:translateX(-50%);max-width:72vw;padding:7px 12px;border-radius:8px;background:#faf7efeb;color:#354c41;font-size:11px;text-align:center;pointer-events:none;font-variant-numeric:tabular-nums}#netCaptureStatus:empty{display:none}.netCueDistance{width:58px}@media(max-width:700px){#netCaptureStatus{bottom:114px;max-width:94vw;width:max-content;font-size:10px}}
+
+
+
+
+/*mobile-ui -- v8: pitch lever + turn stick + latched throttle */
+#touchPad{display:none}
+#uiToggle{display:none}
+@media (pointer:coarse),(max-width:820px){
+  #onlineUI{z-index:10}
+  html,body{overscroll-behavior:none}
+  #world{touch-action:none}
+  header{left:10px;right:56px;top:8px;flex-direction:column;align-items:stretch;gap:6px}
+  header .brand{display:none}
+  header nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:2px 0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  header nav::-webkit-scrollbar{display:none}
+  header nav>*{flex:0 0 auto;font-size:11px;padding:7px 9px}
+
+  #onlineUI #netNavigation{position:fixed;top:calc(74px + env(safe-area-inset-top));left:10px;right:56px;
+    display:flex;flex-wrap:wrap;gap:6px;z-index:7}
+  #onlineUI #netNavigation button{font-size:12px;padding:8px 12px}
+
+  #onlineUI #netLobby{position:fixed;left:8px;right:8px;top:auto;transform:none;width:auto;
+    bottom:calc(300px + env(safe-area-inset-bottom));max-height:calc(100vh - 430px);
+    overflow:auto;padding:16px;z-index:8}
+  #onlineUI #netLobby h2{font-size:22px}
+  #onlineUI #netRoom{position:fixed;left:8px;right:8px;top:auto;width:auto;
+    bottom:calc(300px + env(safe-area-inset-bottom));max-height:calc(100vh - 430px);
+    overflow:auto;z-index:8}
+
+  #onlineUI #netStatus{position:fixed;left:50%;transform:translateX(-50%);width:auto;
+    top:auto;bottom:calc(240px + env(safe-area-inset-bottom));max-width:86vw;z-index:10}
+  #onlineUI #netMessage{position:fixed;left:50%;transform:translateX(-50%);width:auto;
+    top:auto;bottom:calc(208px + env(safe-area-inset-bottom));max-width:86vw;z-index:10}
+  #toast{z-index:11}
+
+  .panel{display:none}
+  footer{display:none}
+  #map{bottom:calc(296px + env(safe-area-inset-bottom));right:8px;transform:scale(.56);transform-origin:bottom right}
+  #paused{top:34%}
+
+  #uiToggle{display:block;position:fixed;right:10px;top:calc(8px + env(safe-area-inset-top));z-index:12;
+    width:38px;height:38px;border-radius:12px;padding:0;font-size:16px;line-height:1;
+    color:#2f5145;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  body.ui-min header nav,body.ui-min #onlineUI #netNavigation{display:none!important}
+
+  #touchPad{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;position:fixed;
+    left:0;right:0;bottom:0;z-index:9;pointer-events:none;
+    padding:10px calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left))}
+
+  /* left: pitch lever, stays where you leave it */
+  .tp-lever{position:relative;width:56px;height:170px;border-radius:32px;pointer-events:auto;touch-action:none;
+    border:1.5px solid rgba(255,255,255,.3);
+    background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.05))}
+  .tp-lever::before{content:"";position:absolute;left:50%;top:18px;bottom:18px;width:2px;
+    transform:translateX(-50%);background:rgba(255,255,255,.32);border-radius:2px}
+  .tp-lever::after{content:"";position:absolute;left:50%;top:50%;width:14px;height:2px;
+    transform:translate(-50%,-50%);background:rgba(255,255,255,.35);border-radius:2px}
+  .tp-lever-knob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;
+    border-radius:50%;background:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.5);
+    pointer-events:none;transition:transform .05s linear}
+
+  /* right column: latched toggles above a horizontal stick */
+  .tp-right{display:grid;gap:12px;justify-items:end}
+  .tp-toggles{display:flex;gap:10px}
+  #touchPad .tp-toggles button{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;
+    width:62px;height:38px;border-radius:12px;padding:0;font-size:13px;font-weight:700;letter-spacing:1px;
+    color:#2f5145;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.45);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  #touchPad .tp-toggles button.on{background:rgba(63,103,92,.72);color:#fff;border-color:rgba(255,255,255,.8)}
+  #touchPad .tp-toggles button[aria-pressed="true"]{background:rgba(63,103,92,.72);color:#fff}
+
+  .tp-stick{position:relative;width:172px;height:64px;border-radius:32px;pointer-events:auto;touch-action:none;
+    border:1.5px solid rgba(255,255,255,.28);
+    background:linear-gradient(90deg,rgba(255,255,255,.12),rgba(255,255,255,.05))}
+  .tp-stick::before{content:"";position:absolute;left:50%;top:50%;width:2px;height:16px;
+    transform:translate(-50%,-50%);background:rgba(255,255,255,.35);border-radius:2px}
+  .tp-knob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
+    background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.45);
+    pointer-events:none;transition:transform .09s linear}
+
+  #touchPad .tp-launch{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;
+    align-self:flex-end;margin-bottom:34px;width:56px;height:56px;border-radius:50%;padding:0;
+    font-size:12px;letter-spacing:1px;color:#2f5145;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  #touchPad .tp-launch.on{background:rgba(63,103,92,.68);color:#fff}
+}
+@media (pointer:coarse) and (orientation:landscape){
+  header nav>*{font-size:10px;padding:6px 8px}
+  #onlineUI #netNavigation{top:calc(60px + env(safe-area-inset-top))}
+  #onlineUI #netLobby,#onlineUI #netRoom{left:auto;right:8px;transform:none;
+    top:calc(116px + env(safe-area-inset-top));bottom:auto;width:min(460px,54vw);
+    max-height:calc(100vh - 196px);z-index:13}
+  #onlineUI #netStatus{left:10px;transform:none;bottom:auto;top:calc(62px + env(safe-area-inset-top));max-width:34vw;z-index:14}
+  #onlineUI #netMessage{left:10px;transform:none;bottom:auto;top:calc(108px + env(safe-area-inset-top));max-width:34vw;z-index:14}
+  #map{transform:scale(.46);bottom:calc(96px + env(safe-area-inset-bottom))}
+  .tp-lever{width:48px;height:132px}
+  .tp-lever-knob{width:38px;height:38px;margin:-19px 0 0 -19px}
+  #touchPad .tp-toggles button{width:56px;height:32px;font-size:11px;border-radius:10px}
+  .tp-stick{width:148px;height:58px;border-radius:29px}
+  .tp-knob{width:38px;height:38px;margin:-19px 0 0 -19px}
+  .tp-right{gap:8px}
+  #touchPad .tp-launch{width:48px;height:48px;font-size:11px;margin-bottom:22px}
+}

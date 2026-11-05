@@ -1,11 +1,19 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>联机追逐 · 风过纸翼 · 本地纸飞机</title>
+<head><script>/*compat-shim-for-legacy-browsers*/
+(function(){var w=window;
+if(!Object.hasOwn){Object.hasOwn=function(o,k){return Object.prototype.hasOwnProperty.call(o,k);};}
+function at(n){n=Math.trunc(n)||0;if(n<0){n+=this.length;}return (n<0||n>=this.length)?undefined:this[n];}
+if(!Array.prototype.at){Object.defineProperty(Array.prototype,'at',{value:at,writable:true,configurable:true});}
+if(!String.prototype.at){Object.defineProperty(String.prototype,'at',{value:at,writable:true,configurable:true});}
+if(w.AbortSignal&&!AbortSignal.timeout){AbortSignal.timeout=function(ms){var c=new AbortController();setTimeout(function(){c.abort();},ms);return c.signal;};}
+if(!w.requestIdleCallback){w.requestIdleCallback=function(f){return setTimeout(function(){f({didTimeout:false,timeRemaining:function(){return 16;}});},1);};}
+})();</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>纸翼追逐 · 一起玩</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="online.css"></head>
+<link rel="stylesheet" href="online.css"><link rel="stylesheet" href="flight-ui.css?v=20261104-10"></head>
 <body>
 <canvas id="world" tabindex="0" aria-label="三维纸飞机飞行画面"></canvas>
 <header><div class="brand"><span class="mark">◩</span><div><h1>风过纸翼</h1><p>A LITTLE FLIGHT, A QUIET WORLD</p></div></div>
@@ -17,21 +25,58 @@
 <div id="viewInfo" hidden><span id="viewDetails"></span><button id="returnView">返回玩家 B</button></div><div id="toast" role="status"></div>
 <footer><div class="telemetry"><div><span>离地高度</span><strong id="altitude">—</strong><small>m</small></div><div><span>飞行速度</span><strong id="speed">—</strong><small>m/s</small></div><div><span>已飞行</span><strong id="distance">0.0</strong><small id="distanceUnit">m</small></div><div class="status"><span id="flightState">等待出发</span><small id="fps">正在准备景色</small></div></div><div class="shortcuts"><span>WS / IK ↕</span><span>AD / JL ↔</span><span id="speedHint">Shift 加速 / Ctrl 减速</span><span id="captureHint">靠近自动锁定</span><span>V 切换视角</span><span>P 暂停</span><button id="reset">R 回到起点</button></div></footer>
 <aside id="map"><canvas id="mapCanvas" width="180" height="180" aria-label="山谷小地图"></canvas><span id="mapLabel">高二教室 / CLASSROOM</span></aside>
-<dialog id="helpDialog"><button id="closeHelp" aria-label="关闭操作说明">×</button><p class="eyebrow">随心飞，慢慢看</p><h2>你的飞行小抄</h2><dl><dt>W / I / ↑</dt><dd>渐进拉升：先抵消下沉，再轻缓爬高；松开继续滑翔</dd><dt>S / K / ↓</dt><dd>低头俯冲，下降时自然加速</dd><dt>AD / JL / ← →</dt><dd>向左右转弯，机翼跟随倾斜</dd><dt>Shift / Ctrl</dt><dd>Shift 加速，Ctrl 减速。追逐赛追击机：按住 Shift 高速 42 m/s，松开低速 22 m/s；低速转弯更灵活。逃逸机为 30 m/s，操控居中。速度平滑变化，碰撞后会减速。</dd><dt>Shift / Ctrl</dt><dd>曳光弹练习和漫游中仍为加速 / 慢飞。</dd><dt>自动捕获</dt><dd>10 米内，目标位于机头前方左右各 45°、没有墙壁遮挡，保持 1.5 秒即自动发射追踪导弹。导弹命中算捕获，遇到墙壁会被拦截。捕获后短暂退场重新加入，重生有 3 秒保护，不限时。小地图持续显示双方位置。顶部可切换追击机或逃逸机。</dd><dt>Z</dt><dd>切换到“曳光弹练习”后按住连续发射曳光弹。彩色敌机三次命中后解体并重新加入；近准星有轻微辅助瞄准，可在顶部关闭。</dd><dt>V / B</dt><dd>V 循环切换玩家 / 三架 AI；B 返回玩家。顶部可切换机尾跟随或机头第一视角。观战时玩家悬停，AI 继续飞行；P 暂停全部。被观察的 AI 被击落后自动换到其他存活飞机。</dd><dt>空格</dt><dd>从起点出发；飞行中碰撞会自动反弹</dd><dt>P / Esc</dt><dd>暂停或继续；切换窗口自动暂停</dd><dt>R</dt><dd>回到当前场景起点，等待重新出发</dd></dl><p>速度越快，翼尖气流越明显；减速时逐渐消散。爬升会逐渐减速，俯冲会明显加速。风声随速度起伏，微风会轻轻推动飞机。</p><p>擦墙会沿墙滑行，正面碰撞会减速弹开；地面、屋顶和课桌也会轻轻弹起继续飞，碰撞时仍可转弯和爬升。玩家与 AI 规则一致，碰撞不扣血。没有计时、燃料和失败惩罚。地图边缘会柔和引导你回到山谷。</p><p>在顶部选择三重中庭 / 教室 / 山谷，以及数学草稿 / 考研机械 / 素白纸 / 黑羽飞鸟。水墨飞鸟拥有独立的鸟形、宽大的墨色双翼与圆润的扇形尾羽：平飞展翼滑翔，俯冲后掠收翼，爬升时轻缓振翅，转弯时左右翅膀有不同姿态。飞机约长 18.6 cm、翼展 12.6 cm，教室约 8.4 × 10.4 × 3.6 m。室内飞行速度降低，镜头动感按室内速度调整。切换场景会回到新场景起点。</p><p>五层迷境每层 1.68 × 1.68 公里，各层高度分别为 312 / 408 / 342 / 456 / 378 米。中央路线有低、中、高三种高度；四种不同弯道连接相邻层，紫色标记的折跃门提供跨层捷径；穿过光环会移动到标明的目的层。真实弯道，按 I / W 爬升并自己转弯，也可反向滑降。折纸都会的飞机放大为长约 1.48 m、翼展约 1 m，双方大小一致。曳光弹练习中玩家巡航约 28–32 m/s，普通上限 38 m/s、加速上限 74 m/s；敌机最高 30 m/s。追逐赛使用前述 22 / 30 / 42 m/s 的三档角色速度。自由漫游及其他楼层保留普通滑翔约 61 m/s、非加速俯冲峰值 68 m/s；按住 Shift 时转弯更快、侧倾更大，最大仰角提高到 25°，松开后平滑恢复。没有直升风柱，可重排弯道方位与折跃门连接。顶部可直接选择各层起点或查看三维布局图。空格重飞会检查前方净空，被困时退回安全航段。</p><p>三重中庭共三层，每层 16 × 16 米、层高 5 米。左侧可见气流辅助上升，按 Ctrl 慢飞并用 J / L 盘旋；右侧是较平静的下降通道。顶部可选起点楼层，也可重新随机布局。换布局会回到起点，走道和落脚区始终留空。</p><p>觉得镜头效果太强，可选“动感 · 柔和”或“关闭”；画面卡顿时选择“省电”。所有资源随文件保存，离线也能玩。</p></dialog>
+<dialog id="helpDialog"><button id="closeHelp" aria-label="关闭操作说明">×</button><p class="eyebrow">随心飞，慢慢看</p><h2>你的飞行小抄</h2><p>手机：按住半屏任意位置出现摇杆，滑动转向和俯仰；另一只手按住加减速。可在菜单切换左右手。</p><p>电脑：W/S 俯仰，A/D 转弯，Shift 加速，Ctrl 减速。追击方在 50 米内、朝向偏差不超过 25°、无遮挡时锁定 2.3 秒，自动发射导弹。</p></dialog>
 <dialog id="layoutDialog"><button id="closeLayout" aria-label="关闭三维布局图">×</button><iframe id="layoutFrame" title="五层迷境三维导航图"></iframe></dialog>
 <div id="error" hidden role="alert"></div>
-<script src="vendor/three.min.js"></script><script src="flight-core.js"></script><script src="ink-bird.js"></script><script src="assets/paperplane-original/plane-data.js"></script><script src="original-plane.js"></script><script src="assets/papersky-plane/plane-data.js"></script><script src="papersky-plane.js"></script><script src="paper.js"></script><script src="valley.js"></script><script src="classroom.js"></script><script src="atrium-layout.js"></script><script src="atrium.js"></script><script src="flight-effects.js"></script><script src="paper-city-style.js"></script><script src="labyrinth.js"></script><script src="flight-contact.js"></script><script src="paper-pilot.js"></script><script src="paper-chase.js"></script><script src="chase-map.js"></script><script src="paper-combat.js"></script><script src="game.js"></script>
-<script src="chase-net-physics.js"></script><script src="chase-net-view.js"></script><script src="paper-pursuit.js"></script><script src="paper-online-ai.js"></script><script src="room-browser.js"></script><script src="paper-online.js"></script></body></html>
+<script defer src="vendor/three.min.js"></script><script defer src="flight-core.js?v=20261104-10"></script><script defer src="ink-bird.js"></script><script defer src="original-plane.js"></script><script defer src="papersky-plane.js"></script><script defer src="paper.js"></script><script defer src="valley.js"></script><script defer src="classroom.js"></script><script defer src="atrium-layout.js"></script><script defer src="atrium.js"></script><script defer src="flight-effects.js"></script><script defer src="paper-city-style.js"></script><script defer src="labyrinth.js"></script><script defer src="flight-contact.js"></script><script defer src="paper-pilot.js"></script><script defer src="paper-chase.js?v=20261104-10"></script><script defer src="chase-map.js"></script><script defer src="paper-combat.js?v=20261104-10"></script><script defer src="game.js?v=20261104-10"></script>
+<script defer src="chase-net-physics.js?v=20261104-10"></script><script defer src="chase-net-view.js"></script><script defer src="paper-pursuit.js?v=20261104-10"></script><script defer src="paper-online-ai.js"></script><script defer src="room-browser.js"></script><script defer src="flight-ui-math.js?v=20261104-10"></script><script defer src="paper-online.js?v=20261104-10"></script><script defer src="flight-ui.js?v=20261104-10"></script><script defer src="flight-solo.js?v=20261104-10"></script><script>
+/* Model data for the PaperSky / PaperPlane skins is fetched only when that skin
+   is actually chosen, so the default paper dart starts without waiting for it.
+   Weak machines additionally start in power-saving quality and skip the 2.4 MB
+   PaperSky skin until it is picked by hand. */
+(function(){
+  var DATA={papersky:'assets/papersky-plane/plane-data.js',original:'assets/paperplane-original/plane-data.js'};
+  var FLAG={papersky:'PaperSkyPlaneData',original:'OriginalPlaneData'};
+  function weak(){
+    var mem=navigator.deviceMemory,cores=navigator.hardwareConcurrency;
+    return !!((mem&&mem<=4)||(cores&&cores<=2));
+  }
+  function have(skin){return !DATA[skin]||window[FLAG[skin]]!==undefined;}
+  function load(skin){
+    if(have(skin))return Promise.resolve(true);
+    return new Promise(function(res){
+      var s=document.createElement('script');s.src=DATA[skin];
+      s.onload=function(){res(true)};s.onerror=function(){res(false)};
+      document.head.appendChild(s);
+    });
+  }
+  function apply(skin){
+    var sel=document.getElementById('skin');
+    if(!sel||have(skin))return;
+    load(skin).then(function(ok){
+      if(!ok||!have(skin))return;
+      sel.value=skin;
+      sel.dispatchEvent(new Event('change'));
+    });
+  }
+  window.addEventListener('load',function(){
+    var sel=document.getElementById('skin');
+    if(!sel)return;
+    if(weak()&&sel.value==='papersky'){
+      sel.value='math';
+      sel.dispatchEvent(new Event('change'));
+      return;
+    }
+    apply(sel.value);
+  });
+  document.addEventListener('DOMContentLoaded',function(){
+    var sel=document.getElementById('skin');
+    if(sel)sel.addEventListener('change',function(){apply(sel.value);});
+    if(!weak())return;
+    var q=document.getElementById('quality');
+    if(q&&q.value!=='low'){q.value='low';q.dispatchEvent(new Event('change'));}
+  });
+})();
+</script>
 
-
-
-
-
-
-
-
-
-
-
-
-
+</body></html>

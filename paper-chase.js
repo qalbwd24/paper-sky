@@ -15,7 +15,7 @@ class PaperChase {
   this.ring=document.createElement('div');this.ring.id='captureRing';combat.overlay.appendChild(this.ring);this.reset();
  }
  get active(){return this.c.mode==='race'&&this.c.enabled&&this.c.active&&this.c.floor===3;}
- isHunter(id){return this.role==='hunter'?id===-1:id===0;}
+ isHunter(id){return this.hunterId!==undefined?id===this.hunterId:(this.role==='hunter'?id===-1:id===0);}
  profile(id=-1){return this.isHunter(id)?this.hunterProfile:this.runnerProfile;}
  actor(id){if(id===-1)return this.playerState?{id,s:this.playerState,generation:this.playerGeneration,dead:this.respawnDelay>0,immune:this.playerImmune}:null;const e=this.c.enemies[id];return e?{id,s:e.s,generation:e.generation,dead:e.dead>0,immune:e.raceImmune||0}:null;}
  reset(){this.lock={id:null,time:0};this.captures=0;this.caught=0;this.total=0;this.cooldown=0;this.respawnDelay=0;this.respawnRequested=false;this.playerImmune=2.5;this.message='';this.messageAge=0;this.playerGeneration++;for(const m of this.missiles){m.life=0;m.mesh.visible=m.trail.visible=false;}this.badge.hidden=this.ring.hidden=true;}
@@ -23,10 +23,10 @@ class PaperChase {
  spawned(e){e.raceImmune=this.c.time<.1?.5:3;e.raceFast=false;e.racePlanAt=0;}
  clear(a,b){const d=b.clone().sub(a),length=d.length();return length<1e-5||!this.c.world.raycast(a,d.divideScalar(length),Math.max(0,length-.08));}
  candidates(hunter){return [-1,0,1,2].map(id=>this.actor(id)).filter(a=>a&&!a.dead&&!this.isHunter(a.id)&&a.immune<=0&&(a.id!==-1||this.c.spectatedId<0)&&!this.missiles.some(m=>m.life>0&&m.target===a.id&&m.generation===a.generation));}
- eligibility(hunter,target){const delta=this.c.pos(target.s).sub(this.c.pos(hunter.s)),distance=delta.length();return distance<=35&&(distance<.01||delta.divideScalar(distance).dot(this.c.dir(hunter.s))>=Math.cos(25*Math.PI/180)-1e-12)&&this.clear(this.c.pos(hunter.s),this.c.pos(target.s));}
+ eligibility(hunter,target){const delta=this.c.pos(target.s).sub(this.c.pos(hunter.s)),distance=delta.length();return distance<=50&&(distance<.01||delta.divideScalar(distance).dot(this.c.dir(hunter.s))>=Math.cos(25*Math.PI/180)-1e-12)&&this.clear(this.c.pos(hunter.s),this.c.pos(target.s));}
  setGoal(e,goal,time,mode){const p=this.c.pos(e.s),n=e.nav;this.c.pilot.clampGoal(goal);Object.assign(n,{goal,origin:p,path:[],index:0,job:null,retry:time,lastGoalAt:time,progressAt:time,best:p.distanceTo(goal),mode,lastCheck:time,visited:[p.clone()]});n.metrics.legs++;}
  newLeg(e,player,time){
-  const p=this.c.pos(e.s),hunter=this.actor(this.role==='hunter'?-1:0);let direction=this.c.dir(e.s),label=this.isHunter(e.id)?'寻找逃逸机':'巡航逃逸';
+  const p=this.c.pos(e.s),hunter=this.actor(this.hunterId??(this.role==='hunter'?-1:0));let direction=this.c.dir(e.s),label=this.isHunter(e.id)?'寻找逃逸机':'巡航逃逸';
   if(this.isHunter(e.id)){
    const targets=this.candidates(e).sort((a,b)=>this.c.pos(a.s).distanceToSquared(p)-this.c.pos(b.s).distanceToSquared(p));const target=targets[0];e.raceTarget=target?.id??null;
    if(target){const goal=this.c.pos(target.s).addScaledVector(this.c.dir(target.s),target.s.speed*.25);this.setGoal(e,goal,time,'追近目标');return;}
@@ -39,7 +39,7 @@ class PaperChase {
  }
  plan(e,player,time){
   this.playerState=player;if(time<(e.racePlanAt||0))return;e.racePlanAt=time+(this.isHunter(e.id)?.45:2);
-  if(this.isHunter(e.id)||!e.nav.goal||this.actor(this.role==='hunter'?-1:0)&&this.c.pos(e.s).distanceTo(this.c.pos(this.actor(this.role==='hunter'?-1:0).s))<90)this.newLeg(e,player,time);
+  if(this.isHunter(e.id)||!e.nav.goal||this.actor(this.hunterId??(this.role==='hunter'?-1:0))&&this.c.pos(e.s).distanceTo(this.c.pos(this.actor(this.hunterId??(this.role==='hunter'?-1:0)).s))<90)this.newLeg(e,player,time);
   if(this.isHunter(e.id)&&e.nav.goal){const delta=e.nav.goal.clone().sub(this.c.pos(e.s)),distance=delta.length(),error=this.c.dir(e.s).dot(delta.normalize());e.raceFast=distance>9&&error>.8&&this.c.pilot.clear(this.c.pos(e.s),this.c.pos(e.s).addScaledVector(this.c.dir(e.s),42),1.7);}else e.raceFast=false;
  }
  launch(hunter,target){
@@ -70,7 +70,7 @@ class PaperChase {
    if(wall||end.y<this.c.world.ground(end.x,end.z,end.y)){if(wall)m.p.addScaledVector(delta,wall.fraction);else m.p.copy(end);this.c.burst(m.p,wall?.normal||new THREE.Vector3(0,1,0),m.v,0xffbc64,6);m.life=0;this.message='导弹被障碍挡住 · 重新追近';this.messageAge=1.2;continue;}
    m.p.copy(end);if(++m.tick%2===0){m.history.unshift(m.p.clone());if(m.history.length>35)m.history.pop();}
   }
-  const hunter=this.actor(this.role==='hunter'?-1:0);
+  const hunter=this.actor(this.hunterId??(this.role==='hunter'?-1:0));
   if(!hunter||hunter.dead||hunter.id===-1&&this.c.spectatedId>=0||this.cooldown>0||this.missiles.some(m=>m.life>0)){this.lock={id:null,time:0};return;}
   const eligible=this.candidates(hunter).filter(a=>this.eligibility(hunter,a));let target=eligible.find(a=>a.id===this.lock.id)||eligible.sort((a,b)=>this.c.pos(a.s).distanceToSquared(this.c.pos(hunter.s))-this.c.pos(b.s).distanceToSquared(this.c.pos(hunter.s)))[0];
   if(target){if(this.lock.id!==target.id)this.lock={id:target.id,time:0};this.lock.time+=dt;if(this.lock.time>=2.3&&!this.launch(hunter,target))this.lock.time=.45;}
@@ -78,7 +78,7 @@ class PaperChase {
  }
  render(alpha,camera,s){
   this.group.visible=this.active;for(const m of this.missiles){m.mesh.visible=m.trail.visible=this.active&&m.life>0;if(!m.mesh.visible)continue;m.mesh.position.copy(m.old).lerp(m.p,alpha);m.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),m.v.clone().normalize());m.mesh.position.toArray(m.positions,0);m.history.forEach((p,i)=>p.toArray(m.positions,(i+1)*3));m.trail.geometry.setDrawRange(0,m.history.length+1);m.trail.geometry.attributes.position.needsUpdate=true;}
-  this.badge.hidden=!this.active||this.messageAge<=0;this.badge.textContent=this.message;this.ring.hidden=true;for(const cue of this.c.cues){cue.classList.remove('raceCue','raceHunter');}if(!this.active||!camera||!s)return;
+  if(this.c.soloExperience)return;this.badge.hidden=!this.active||this.messageAge<=0;this.badge.textContent=this.message;this.ring.hidden=true;for(const cue of this.c.cues){cue.classList.remove('raceCue','raceHunter');}if(!this.active||!camera||!s)return;
   this.c.overlay.querySelector('#gunSight').hidden=true;this.c.overlay.querySelector('#hitConfirm').hidden=true;
   const status=this.c.overlay.querySelector('#combatStatus');status.textContent=this.role==='hunter'?`追击机 · ${s.boostControl>.5?'高速追近 42':'低速灵活 22'} m/s · Shift 加速 / Ctrl 减速 · 捕获 ${this.captures} · 不限时`:`逃逸机 · 30 m/s · 被捕获 ${this.caught} 次 · 不限时`;
   for(const e of this.c.enemies){const cue=this.c.cues[e.id];if(cue.hidden)continue;cue.classList.add('raceCue');cue.classList.toggle('raceHunter',this.isHunter(e.id));const distance=Math.round(e.mesh.position.distanceTo(this.c.pos(s))),arrow=cue.querySelector('span')?.outerHTML||'➤';cue.innerHTML=(cue.classList.contains('offscreen')?arrow+' ':'◎ ')+(this.isHunter(e.id)?'追击机':'逃逸机')+' '+distance+'m';}
